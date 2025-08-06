@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include 'partials/header.html' %}
+<div class="grid md:grid-cols-3 gap-6 p-6 bg-gray-100">
+    
+    <div class="col-span-2 space-y-4">
+        
+        <!-- Customer Address -->
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">1. Contact</h2>
+            <p>Mpesa registered number to make the payment</p>
+            <input type="text" id="phone" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="Enter your phone number" />
+        </div>
+
+        <!-- Delivery Details -->
+        <div class="bg-white p-4 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold text-gray-700">2. DELIVERY DETAILS</h2>
+            <select class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2">
+                <option>Country/Region</option>
+                <option>Kenya</option>
+            </select>
+            <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="First name" />
+            <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="Enter your Town" />
+            <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="Enter your city" />
+            
+            <div class="mb-6">
+                <div class="max-w-md mx-auto p-4 bg-white rounded-xl shadow-md">
+                    <h2 class="text-lg font-semibold mb-4">Shipping method</h2>
+                    <form class="space-y-2">
+                      <!-- Nairobi Area (Selected) -->
+                      <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer bg-blue-50 border-blue-500">
+                        <div class="flex items-center space-x-3">
+                          <input type="radio" name="shipping" value="Nairobi Area" checked class="accent-blue-600" />
+                          <span>Nairobi Area</span>
+                        </div>
+                        <span class="font-medium">KES 300.00</span>
+                      </label>
+                  
+                      <!-- Other Locations -->
+                      <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-100">
+                        <div class="flex items-center space-x-3">
+                          <input type="radio" name="shipping" value="Gatundu" class="accent-blue-600" />
+                          <span>Gatundu</span>
+                        </div>
+                        <span class="font-medium">KES 350.00</span>
+                      </label>
+                  
+                      <!-- Add more labels here as needed... -->
+                    </form>
+                  </div>
+            </div>
+
+            <!-- Location Selection Form -->
+            <div class="mt-4 p-4 border rounded-lg bg-white">
+                <h3 class="text-md font-semibold mb-2">Shipping Sammary</h3>
+
+              
+
+                <div class="bg-pink-50 border border-pink-100 rounded-lg p-4">
+                    <h3 class="font-semibold text-lg mb-2">Kahawa West <span class="text-orange-500">KSH 140</span></h3>
+                    
+                    
+                    <div class="mt-2">
+                        <p class="text-sm font-semibold mb-1">Contact Information</p>
+                        <p class="text-sm text-gray-600">Customer Care 0717988187</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="bg-white p-6 rounded-lg shadow-md space-y-6">
+            <h2 class="text-lg font-semibold text-gray-700">3. PAYMENT METHOD</h2>
+
+            <label class="flex items-start space-x-2">
+                <input type="radio" name="payment" class="mt-1 h-4 w-4 text-orange-500" />
+                <div>
+                    <p class="font-semibold">Pay Now M-Pesa.</p>
+                    <div class="flex space-x-2 mt-2">
+                        <img src="/images/mpesa.png" alt="M-Pesa" class="h-6" />
+                    </div>
+                </div>
+            </label>
+
+        </div>
+    
+
+    <!-- Order Summary -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+        <h2 class="text-lg font-semibold text-gray-700 text-right">Order summary</h2>
+        <div class="mt-4 text-right">
+            <p>Item's total: KSh 2,790</p>
+            <p>Delivery fees: KSh 140</p>
+            <p class="text-green-600">90% off : -KSh 288</p>
+            <p class="font-bold">Total: KSh 2,642</p>
+        </div>
+        <a href="{{ url_for('order.order_process') }}" class="block mt-4">
+        <button class="w-full mt-6 bg-orange-500 text-white py-2 rounded-lg">
+            CONFIRM ORDER & PAY
+        </button>
+    </a>
+    </div>
+</div>
+</div>
+{% endblock %}

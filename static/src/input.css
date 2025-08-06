@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
+    /* Better input sizing for mobile */
+    input[type="text"], input[type="email"] {
+        font-size: 16px !important; /* Prevent iOS zoom */
+    }
+    
+    /* Verification code inputs */
+    input[name^="code"] {
+        height: 50px !important;
+        width: 40px !important;
+        font-size: 1.5rem !important;
+    }
+    
+    /* Prevent layout shift when keyboard appears */
+    body {
+        height: 100vh;
+        height: calc(var(--vh, 1vh) * 100);
+        overflow: hidden;
+    }
+}
+
+/* Prevent blue highlight on tap */
+input, textarea, button, select, a {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+/* Better touch targets */
+button, a {
+    min-height: 44px;
+    min-width: 44px;
+}

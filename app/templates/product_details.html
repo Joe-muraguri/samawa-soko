@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} - Product Details{% endblock %}
+{% block content %}
+<body class="bg-gray-50 font-sans">
+    {% include 'partials/header.html' %}
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Back to products link -->
+        <div class="mb-6">
+            <a href="{{ url_for('product.get_products')}}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Back to products
+            </a>
+        </div>
+
+        <!-- Product Section -->
+        <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+            <!-- Product Image -->
+            <div class="mb-8 lg:mb-0">
+                <div class="bg-white rounded-lg overflow-hidden shadow-md">
+                    <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" class="w-full h-auto object-cover">
+                </div>
+                {% if product.images %}
+                <div class="grid grid-cols-4 gap-2 mt-4">
+                    {% for image in product.images %}
+                    <div class="border rounded-md p-1 cursor-pointer">
+                        <img src="{{ image.thumbnail_url }}" alt="Thumbnail" class="w-full h-auto">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Product Details -->
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
+                
+                <p class="text-gray-700 mb-6">
+                    {{ product.description }}
+                </p>
+
+                <div class="mb-6">
+                    <span class="text-3xl font-bold text-gray-900">Ksh {{ "%.2f"|format(product.price) }}</span>
+                    {% if product.original_price %}
+                    <span class="ml-2 text-sm text-gray-500 line-through">Ksh {{ "%.2f"|format(product.original_price) }}</span>
+                    {% if product.discount_percent %}
+                    <span class="ml-2 text-sm font-medium text-green-600">{{ product.discount_percent }}% off</span>
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-sm font-medium text-gray-900">Quantity</h3>
+                    <div class="flex items-center mt-2">
+                        <button class="bg-gray-200 px-3 py-1 rounded-l-md hover:bg-gray-300" onclick="updateQuantity(-1)">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <span id="quantity" class="bg-gray-100 px-4 py-1 text-center">1</span>
+                        <button class="bg-gray-200 px-3 py-1 rounded-r-md hover:bg-gray-300" onclick="updateQuantity(1)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3" id="button-group">
+                    <!-- Initial State (Before Adding to Cart) -->
+                    <div id="initial-buttons" class="space-y-3">
+                        <button id="add-to-cart-btn" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors" onclick="addToCart({{ product.id }})">
+                            Add to Cart
+                        </button>
+                        <a href="/checkout" class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors flex items-center justify-center">
+                            <i class="fas fa-bolt mr-2"></i> Buy Now
+                        </a>
+                    </div>
+                    
+                    <!-- After Adding to Cart (Hidden by default) -->
+                    <div id="after-add-buttons" class="hidden space-y-3">
+                        <a href="{{ url_for('cart.view_cart') }}" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors flex items-center justify-center">
+                            <i class="fas fa-shopping-cart mr-2"></i> View Cart
+                        </a>
+                        <a href="{{ url_for('product.get_products')}}" class="w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors flex items-center justify-center">
+                            <i class="fas fa-arrow-left mr-2"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Product Details Accordion -->
+                {% if product.description %}
+                <div class="mt-8 border-t border-gray-200 pt-6">
+                    <details class="group" open>
+                        <summary class="flex justify-between items-center cursor-pointer list-none">
+                            <h3 class="text-lg font-medium text-gray-900">Features</h3>
+                            <span class="transition group-open:rotate-180">
+                                <i class="fas fa-chevron-down"></i>
+                            </span>
+                        </summary>
+                        <div class="mt-2 text-gray-700">
+                            <ul class="list-disc pl-5 space-y-1">
+                                {% if product.details %}
+                                {% for detail in product.details %}
+                                <li>{{ detail }}</li>
+                                {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </details>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        let currentQuantity = 1;
+        let isAddedToCart = false;
+        
+        function updateQuantity(change) {
+            currentQuantity = Math.max(1, currentQuantity + change);
+            document.getElementById('quantity').textContent = currentQuantity;
+        }
+        
+        async function addToCart(productId, quantity = 1) {
+            if(isAddedToCart) return;
+            
+            const btn = document.getElementById('add-to-cart-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
+
+            const response = await fetch(`http://localhost:5000/api/cart/${productId}/add_cart`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' // Useful for backend to identify AJAX
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: currentQuantity
+            })
+        })
+            
+            // Simulate API call
+            
+                // This would be replaced with actual fetch/AJAX call
+                // fetch('/cart/add', { 
+                //   method: 'POST', 
+                //   body: JSON.stringify({
+                //     product_id: "{{ product.id }}",
+                //     quantity: currentQuantity
+                //   }) 
+                // })
+                
+                // Show success state
+                isAddedToCart = true;
+                
+                // Hide initial buttons and show after-add buttons
+                document.getElementById('initial-buttons').classList.add('hidden');
+                document.getElementById('after-add-buttons').classList.remove('hidden');
+                
+                // Optional: Show a notification
+                showNotification('Product added to cart!');
+            
+        }
+        
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'fixed z-[100] top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg transform transition-all duration-300 translate-y-2 opacity-0';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-y-2', 'opacity-0');
+                notification.classList.add('translate-y-0', 'opacity-100');
+            }, 10);
+            
+            // Animate out after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('translate-y-0', 'opacity-100');
+                notification.classList.add('translate-y-2', 'opacity-0');
+                
+                // Remove after animation
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+<!-- Include footer if needed -->
+
+{% endblock %}

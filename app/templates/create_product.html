@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="min-h-screen bg-white text-gray-800 font-sans">
+        {% include 'partials/header.html' %}
+
+
+        <div class="container mx-auto px-4 py-6">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="p-6">
+                    <div class="text-center mb-5">
+                        <h1 class="text-xl font-bold text-gray-800">Create New Product</h1>
+                    </div>
+                    
+                    <form id="productForm" class="space-y-4" enctype="multipart/form-data">
+                        <!-- Product Name -->
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+                            <input type="text" id="name" name="name" required
+                                class="w-full px-3 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Enter product name">
+                        </div>
+                        
+                        <!-- Description -->
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea id="description" name="description" rows="3" required
+                                class="w-full px-3 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Enter product description"></textarea>
+                        </div>
+                        
+                        <!-- Price -->
+                        <div>
+                            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500">Ksh </span>
+                                </div>
+                                <input type="number" id="price" name="price" step="0.01" min="0" required
+                                    class="block w-full pl-12 pr-12 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    placeholder="0.00">
+                            </div>
+                        </div>
+                        
+                        <!-- Stock Quantity -->
+                        <div>
+                            <label for="stock" class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                            <input type="number" id="stock" name="stock" min="0" required
+                                class="w-full px-3 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Enter quantity">
+                        </div>
+                        
+                        <!-- Image Upload -->
+                        <div>
+                            <label for="image_upload" class="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
+                            <div class="mt-1 flex items-center">
+                                <label for="image_upload" class="cursor-pointer">
+                                    <span class="inline-block py-2 px-4 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Choose File
+                                    </span>
+                                    <input id="image_upload" name="image_url" type="file" accept="image/*" class="sr-only">
+                                </label>
+                                <span id="file_name" class="ml-2 text-sm text-gray-500">No file chosen</span>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <div id="imagePreviewContainer" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Image Preview</label>
+                            <div class="mt-1">
+                                <img id="imagePreview" src="#" alt="Product preview" class="w-full h-auto rounded-md border border-gray-300 max-h-60 object-contain">
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="pt-2">
+                            <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Create Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            // Handle file selection and preview
+            document.getElementById('image_upload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const fileNameElement = document.getElementById('file_name');
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const imagePreview = document.getElementById('imagePreview');
+                
+                if (file) {
+                    // Show file name
+                    fileNameElement.textContent = file.name;
+                    
+                    // Validate file type and size
+                    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+                    
+                    if (!validTypes.includes(file.type)) {
+                        alert('Please select a valid image file (JPEG, PNG, GIF)');
+                        this.value = '';
+                        fileNameElement.textContent = 'No file chosen';
+                        return;
+                    }
+                    
+                    if (file.size > maxSize) {
+                        alert('File is too large (max 5MB)');
+                        this.value = '';
+                        fileNameElement.textContent = 'No file chosen';
+                        return;
+                    }
+                    
+                    // Create preview
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        previewContainer.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    fileNameElement.textContent = 'No file chosen';
+                    previewContainer.classList.add('hidden');
+                }
+            });
+    
+            // Form submission handling
+            document.getElementById('productForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Mobile-friendly validation
+                if (!this.checkValidity()) {
+                    // Scroll to the first invalid field
+                    const invalidField = this.querySelector(':invalid');
+                    if (invalidField) {
+                        invalidField.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        invalidField.focus();
+                    }
+                    return;
+                }
+                
+                // Get form values
+                // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Creating...';
+            
+            // Create async function to handle the submission
+            const handleSubmit = async () => {
+                try {
+                    const formData = new FormData(this);
+                    
+                    // Send to Flask backend
+                    const response = await fetch('http://localhost:5000/api/products/create_product', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        alert('Product created successfully!');
+                        this.reset();
+                        document.getElementById('file_name').textContent = 'No file chosen';
+                        document.getElementById('imagePreviewContainer').classList.add('hidden');
+                    } else {
+                        throw new Error(result.message || 'Failed to create product');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert(error.message);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Create Product';
+                }
+            };
+            
+            // Call the async function
+            handleSubmit();
+        });
+
+            // Better mobile keyboard handling for number inputs
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('focus', function() {
+                    // On mobile, ensure the input is scrolled into view properly
+                    setTimeout(() => {
+                        this.scrollIntoView({
+                            block: 'center',
+                            behavior: 'smooth'
+                        });
+                    }, 300);
+                });
+            });
+        </script>
+    </div>
+{% endblock %}

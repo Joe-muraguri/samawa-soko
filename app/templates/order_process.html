@@ -1,0 +1,151 @@
+<!-- checkout.html (your confirmation page) -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    {% include 'partials/header.html' %}
+
+    <div id="payment-flow">
+        <!-- Initial Loading State -->
+        <div id="loading-state" class="bg-white p-6 rounded-lg shadow-md text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <h2 class="text-xl font-semibold mb-2">Processing Your Order</h2>
+            <p class="text-gray-600 mb-4">Please wait while we prepare your payment request...</p>
+            <p class="text-sm text-gray-500">You will receive an STK push prompt on your phone shortly</p>
+        </div>
+
+        <!-- Payment Success (hidden initially) -->
+        <div id="success-state" class="bg-white p-6 rounded-lg shadow-md text-center hidden">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h2 class="text-xl font-semibold mb-2">Order Placed Successfully!</h2>
+            <p class="text-gray-600 mb-4">Your payment has been confirmed. Order #<span id="order-id"></span></p>
+            <div class="bg-gray-50 p-4 rounded-md mb-4 text-left">
+                <h3 class="font-medium mb-2">What's next?</h3>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>Order confirmation sent to your email</li>
+                    <li>Delivery updates will be sent via SMS</li>
+                    <li>Expected delivery: <span id="delivery-date"></span></li>
+                </ul>
+            </div>
+            <a href="" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded transition duration-200">
+                Track Your Order
+            </a>
+        </div>
+
+        <!-- Payment Failed (hidden initially) -->
+        <div id="failed-state" class="bg-white p-6 rounded-lg shadow-md text-center hidden">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <h2 class="text-xl font-semibold mb-2">Payment Not Completed</h2>
+            <p class="text-gray-600 mb-4">We couldn't confirm your M-Pesa payment</p>
+            <div class="bg-gray-50 p-4 rounded-md mb-4 text-left">
+                <h3 class="font-medium mb-2">What you can do:</h3>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>Check your phone for the STK push notification</li>
+                    <li>Ensure you have sufficient funds</li>
+                    <li>Try again in a few minutes</li>
+                </ul>
+            </div>
+            <div class="flex space-x-3 justify-center">
+                <a href="" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded transition duration-200">
+                    Try Payment Again
+                </a>
+                <a href="" class="inline-block border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-2 rounded transition duration-200">
+                    Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+document.addEventListener('DOMContentLoaded', function() {
+    // Start payment processing immediately
+    initiatePayment();
+
+    async function initiatePayment() {
+        try {
+            // 1. Initiate M-Pesa STK Push
+            const response = await fetch('http://localhost:5000/api/checkout/initiate-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    
+                },
+                body: JSON.stringify({
+                    // Include any necessary checkout data
+                    amount: 1,
+                    phone: '0717988187'
+                })
+            });
+
+            const data = await response.json();
+            console.log('Payment initiation response:', data);
+            
+            if (data.success) {
+                // 2. Start polling for payment confirmation
+                pollPaymentStatus(data.order_id);
+            } else {
+                showPaymentFailed(data.message || 'Payment initiation failed');
+            }
+        } catch (error) {
+            console.error('Payment error:', error);
+            showPaymentFailed('Network error while processing payment');
+        }
+    }
+
+    function pollPaymentStatus(orderId) {
+        const maxAttempts = 20;
+        let attempts = 0;
+        
+        const interval = setInterval(async () => {
+            attempts++;
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/checkout/check-payment/${orderId}`);
+                const data = await response.json();
+                
+                if (data.payment_status === 'completed') {
+                    clearInterval(interval);
+                    showPaymentSuccess(orderId, data.delivery_date);
+                    
+                    // Send confirmation email/SMS
+                    await fetch(`/order/confirm/${orderId}`, { method: 'POST' });
+                    
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    showPaymentFailed('Payment confirmation timed out');
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+                clearInterval(interval);
+                showPaymentFailed('Error verifying payment');
+            }
+        }, 3000); // Check every 3 seconds
+    }
+
+    function showPaymentSuccess(orderId, deliveryDate) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('success-state').classList.remove('hidden');
+        document.getElementById('order-id').textContent = orderId;
+        document.getElementById('delivery-date').textContent = deliveryDate || '2-3 business days';
+    }
+
+    function showPaymentFailed(errorMessage) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('failed-state').classList.remove('hidden');
+        
+        if (errorMessage) {
+            document.querySelector('#failed-state p.text-gray-600').textContent += `: ${errorMessage}`;
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="min-h-screen bg-white text-gray-800 font-sans">
+        {% include 'partials/header.html' %}
+
+        <!-- Hero Banner -->
+        <section class="bg-gray-100 p-6 flex flex-col md:flex-row items-center justify-between">
+            <div>
+            <h2 class="text-3xl font-bold mb-2 text-red-700">Spring Sales</h2>
+            <p class="mb-4">Up to 50% off</p>
+            <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Shop Now</a>
+            </div>
+            <img src="{{ url_for('static', filename='images/hero-bag.png') }}" alt="Sale Bag" class="w-48 mt-4 md:mt-0" />
+        </section>
+
+
+        <!-- Categories -->
+        <section class="p-6">
+            <h3 class="text-xl font-semibold mb-4">Shop by Categoryss</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for category in categories %}
+                <div class="border p-4 rounded text-center hover:shadow-md">
+                <div class="h-24 bg-gray-200 mb-2"></div>
+                <p>{{ category.name }}</p>
+                </div>
+            {% endfor %}
+            </div>
+        </section>
+
+        <!-- Featured Products -->
+        <section class="p-6">
+            <h3 class="text-xl font-semibold mb-4">Featured Products</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for product in products %}
+                <div class="border p-4 rounded hover:shadow-md">
+                    <a href="{{ url_for('product.get_product', id=product.id) }}">
+                        <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" class="h-32 w-full object-cover mb-2" />
+                        <p class="font-medium">{{ product.name }}</p>
+                        <span class="ml-4 text-sm {% if product.stock > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                            {% if product.stock > 0 %}
+                            {{ product.stock }} available
+                            {% else %}
+                            Out of stock
+                            {% endif %}
+                        </span>
+                        <p class="text-sm text-gray-600">Ksh {{product.price}} </p>
+                        <!-- <a href="/add-to-cart/{{ product.id }}" class="mt-2 text-sm text-blue-600 hover:underline inline-block">Add to Cart</a> -->
+                    </a>
+                </div>
+            {% endfor %}
+            </div>
+        </section>
+
+        <!-- Deal of the Day -->
+        <section class="bg-gray-100 p-6 text-center">
+            <h4 class="text-lg font-semibold mb-2">Deal of the Day</h4>
+            <p class="mb-2"> dealtitle </p>
+            <a href="/product/" class="bg-black text-white px-4 py-2 rounded">Buy Now</a>
+        </section>
+
+        <!-- Newsletter -->
+        <section class="p-6 text-center">
+            <h4 class="text-lg font-semibold mb-2">Get 10% Off Your First Order!</h4>
+            <form action="/subscribe" method="POST" class="flex flex-col md:flex-row justify-center items-center">
+            <input type="email" name="email" placeholder="Email address" required class="border px-3 py-2 rounded w-full md:w-1/4" />
+            <button type="submit" class="mt-2 md:mt-0 md:ml-2 bg-blue-600 text-white px-4 py-2 rounded">Subscribe</button>
+            </form>
+        </section>
+
+
+        
+    </div>
+    
+{% endblock %}

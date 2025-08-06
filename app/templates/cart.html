@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="min-h-screen bg-white text-gray-800 font-sans">
+    {% include 'partials/header.html' %}
+
+{% if not cart['items'] %}
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <p class="text-lg font-semibold mb-4">Your cart is empty.</p>
+        <a href="{{ url_for('product.get_products') }}" class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition duration-200">
+            Continue Shopping
+        </a>
+    </div>
+{% else %}
+    <div class="flex flex-col lg:flex-row lg:space-x-6">
+        <!-- Cart Items -->
+        <div class="w-full lg:w-2/3 space-y-3" id="cart-items-container">
+            {% for product_id, item in cart['items'].items() %}
+            <div class="bg-white p-3 shadow-md rounded-lg flex items-start gap-3" id="cart-item-{{ product_id }}" data-item-id="{{ product_id }}">
+                <!-- Product Image -->
+                <div class="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    {% if item.image_url %}
+                        <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <svg class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    {% endif %}
+                </div>
+                
+                <!-- Product Info -->
+                <div class="flex-grow min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
+                        <div class="min-w-0">
+                            <h2 class="text-sm sm:text-base font-medium truncate">{{ item.name }}</h2>
+                            <p class="text-xs text-gray-600 truncate">Product ID: {{ product_id }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm sm:text-base font-semibold">KSh <span class="item-price" data-price="{{ item.price }}">{{ "%.2f"|format(item.price) }}</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2 flex items-center justify-between">
+                        <!-- Quantity Controls -->
+                        <div class="flex items-center space-x-2">
+                            <button class="decrement-btn w-6 h-6 flex items-center justify-center border rounded-md text-gray-600 hover:bg-gray-100"
+                            onclick="updateCartQuantity('{{ product_id }}', -1)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                </svg>
+                            </button>
+                            <span id="qty-display-{{ product_id }}" class="item-quantity text-sm w-8 text-center">{{ item.quantity }}</span>
+                            <button class="increment-btn w-6 h-6 flex items-center justify-center border rounded-md text-gray-600 hover:bg-gray-100"
+                            onclick="updateCartQuantity('{{ product_id }}', 1)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Remove Button -->
+                         <form method="POST" action="{{ url_for('cart.remove_from_cart', cart_id=product_id) }}" onsubmit="return confirm('Are you sure you want to remove this item?');">
+                        <button class="remove-btn text-red-500 hover:text-red-700 text-xs sm:text-sm flex items-center">
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Remove
+                        </button>
+                        </form>
+                     
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+
+        <!-- Cart Summary -->
+         
+        <div class="w-full lg:w-1/3 mt-4 lg:mt-0">
+            <div class="bg-white p-4 shadow-md rounded-lg sticky top-6" id="cart-summary">
+                <h2 class="text-lg font-semibold mb-3">Order Summary</h2>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span>Items (<span id="total-items">{{ cart.total_items }}</span>)</span>
+                        <span>KSh <span id="subtotal">{{ "%.2f"|format(cart.subtotal) }}</span></span>
+                    </div>
+                    <div class="flex justify-between text-green-600">
+                        <span>Discount</span>
+                        <span>-KSh <span id="discount">{{ "%.2f"|format(cart.discount) }}</span></span>
+                    </div>
+                    <div class="border-t border-gray-200 my-2"></div>
+                    <div class="flex justify-between font-bold">
+                        <span>Total</span>
+                        <span>KSh <span id="cart-total"></span></span>
+                    </div>
+                </div>
+                <a href="{{ url_for('checkout.checkout') }}">
+                    <button class="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 text-sm sm:text-base rounded transition duration-200">
+                        CHECKOUT (KSh <span id="checkout-total">{{ "%.2f"|format(cart.subtotal) }}</span>)
+                    </button>
+                </a>
+            </div>
+        </div>
+        
+    </div>
+
+
+<script>
+    async function updateCartQuantity(productId, change) {
+        const display = document.getElementById(`qty-display-${productId}`);
+        let currentQuantity = parseInt(display.textContent);
+        currentQuantity += change;
+        if (currentQuantity < 1) {
+            alert('Quantity cannot be less than 1.');
+            return;
+        }
+        display.textContent = currentQuantity;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/cart/update/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({product_id: productId, quantity: currentQuantity})
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            if (!data.success) {
+                alert('Failed to update cart');
+                display.textContent = currentQuantity; // Revert quantity on error
+            }
+        }
+        catch (error) {
+            console.error('Error updating cart:', error);
+            alert('An error occurred while updating the cart. Please try again.');
+            display.textContent = currentQuantity; // Revert quantity on error
+        }
+
+        document.getElementById('cart-total').textContent = data.totals.subtotal.toFixed(2);
+        document.getElementById('subtotal').textContent = data.totals.subtotal.toFixed(2);
+        document.getElementById('discount').textContent = data.totals.discount.toFixed(2);
+        document.getElementById('checkout-total').textContent = data.totals.total.toFixed(2);
+
+
+    } {
+        
+    }
+</script>
+ 
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+    function removeItemFromCart(productId){
+        fetch(`http://localhost:5000/api/cart/${productId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload(); // Reload the page to reflect changes
+            } else {
+                alert('Error removing item: ' + data.message);
+            }
+        })
+    }
+
+});
+</script> -->
+
+    <!-- // Event delegation for quantity buttons
+    document.getElementById('cart-items-container').addEventListener('click', function(e) {
+        const itemElement = e.target.closest('[id^="cart-item-"]');
+        if (!itemElement) return;
+        
+        const itemId = itemElement.dataset.itemId;
+        const quantityElement = itemElement.querySelector('.item-quantity');
+        const priceElement = itemElement.querySelector('.item-price');
+        let currentQuantity = parseInt(quantityElement.textContent);
+        const price = parseFloat(priceElement.dataset.price);
+
+        // Handle increment
+        if (e.target.closest('.increment-btn')) {
+            currentQuantity += 1;
+            updateItemQuantity(itemId, currentQuantity, price, quantityElement);
+        }
+        // Handle decrement
+        else if (e.target.closest('.decrement-btn')) {
+            if (currentQuantity > 1) {
+                currentQuantity -= 1;
+                updateItemQuantity(itemId, currentQuantity, price, quantityElement);
+            }
+        }
+        // Handle remove
+        else if (e.target.closest('.remove-btn')) {
+            removeItem(itemId, itemElement);
+        }
+    });
+
+    function updateItemQuantity(itemId, newQuantity, price, quantityElement) {
+        // Update the UI immediately
+        quantityElement.textContent = newQuantity;
+        
+        // Here you would typically make an AJAX call to your backend
+        // fetch(`/cart/update/${itemId}`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         
+        //     },
+        //     body: JSON.stringify({ quantity: newQuantity })
+        // })
+        // .then(response => response.json())
+        // .then(data => {
+        //     if (data.success) {
+        //         updateCartSummary();
+        //     } else {
+        //         // Revert UI if update failed
+        //         quantityElement.textContent = newQuantity - (newQuantity > currentQuantity ? 1 : -1);
+        //     }
+        // });
+        
+        // For demo purposes, we'll just update the UI
+        updateCartSummary();
+    }
+
+    function removeItem(itemId, itemElement) {
+        if (!confirm('Are you sure you want to remove this item from your cart?')) return;
+        
+        // Here you would typically make an AJAX call to your backend
+        // fetch(`/cart/remove/${itemId}`, {
+        //     method: 'POST',
+        //     headers: {
+        //         
+        //     }
+        // })
+        // .then(response => response.json())
+        // .then(data => {
+        //     if (data.success) {
+        //         itemElement.remove();
+        //         updateCartSummary();
+        //         checkEmptyCart();
+        //     }
+        // });
+        
+        // For demo purposes, we'll just update the UI
+        itemElement.remove();
+        updateCartSummary();
+        checkEmptyCart();
+    }
+
+    function updateCartSummary() {
+        let totalItems = 0;
+        let subtotal = 0;
+        
+        document.querySelectorAll('[id^="cart-item-"]').forEach(item => {
+            const quantity = parseInt(item.querySelector('.item-quantity').textContent);
+            const price = parseFloat(item.querySelector('.item-price').dataset.price);
+            
+            totalItems += quantity;
+            subtotal += quantity * price;
+        });
+        
+        const discount = subtotal * 0.33;
+        const total = subtotal - discount;
+        
+        // Update summary DOM
+        document.getElementById('total-items').textContent = totalItems;
+        document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('discount').textContent = discount.toFixed(2);
+        document.getElementById('cart-total').textContent = total.toFixed(2);
+        document.getElementById('checkout-total').textContent = total.toFixed(2);
+    }
+
+    function checkEmptyCart() {
+        if (document.querySelectorAll('[id^="cart-item-"]').length === 0) {
+            window.location.reload(); // Reload to show empty cart message
+        }
+    } -->
+</div>
+{% endif %}
+
+    
+{% endblock %}

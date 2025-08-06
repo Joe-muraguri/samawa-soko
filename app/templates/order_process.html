@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function initiatePayment() {
         try {
             // 1. Initiate M-Pesa STK Push
-            const response = await fetch('http://localhost:5000/initiate-payment', {
+            const response = await fetch('http://localhost:5000/api/checkout/initiate-payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
             attempts++;
             
             try {
-                const response = await fetch(`http://localhost:5000/check-payment/${orderId}`);
+                const response = await fetch(`http://localhost:5000/api/checkout/check-payment/${orderId}`);
                 const data = await response.json();
                 
                 if (data.payment_status === 'completed') {

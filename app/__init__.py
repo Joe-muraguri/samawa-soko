@@ -18,6 +18,12 @@ def create_app():
         )
     app.config.from_object(Config)   #loads the configurations from the Config.py
 
+    from flask import redirect
+
+    @app.route('/')
+    def homepage():
+        return redirect('/api/products/')
+
     # In your Flask app configuration
     app.config['SECRET_KEY'] = 'warutere'
     app.config['SESSION_TYPE'] = 'filesystem'  # Or 'redis' for production
@@ -70,9 +76,9 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(google_bp, url_prefix='/api/login')
-    app.register_blueprint(product_bp)
-    app.register_blueprint(cart_bp)
-    app.register_blueprint(checkout_bp)
+    app.register_blueprint(product_bp, url_prefix='/api/products')
+    app.register_blueprint(cart_bp, url_prefix='/api/cart')
+    app.register_blueprint(checkout_bp, url_prefix='/api/checkout')
     app.register_blueprint(order_bp, url_prefix='/api/orders')
     app.register_blueprint(payment_bp, url_prefix='/api/payment')   
 

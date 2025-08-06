@@ -126,7 +126,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
 
-            const response = await fetch(`http://localhost:5000/cart/${productId}/add_cart`, {
+            const response = await fetch(`http://localhost:5000/api/cart/${productId}/add_cart`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

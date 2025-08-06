@@ -153,7 +153,8 @@ def check_payment(order_id):
         order = Order.query.get(order_id)
         if not order:
             return jsonify({'payment_status': 'not_found'}), 404
-        
+        print("Checking payment status for order ID:", order_id)
+        print("Order status:", order.status)
         if order.status == 'completed':
             return jsonify({
                 'payment_status': 'completed',

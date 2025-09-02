@@ -4,6 +4,9 @@ from app.config import Config
 from datetime import timedelta
 from app.extensions import jwt, db, migrate,cors,mail
 from app.models.user import User
+from app.models.product import Product
+from app.models.order import Order, OrderItem
+from app.models.cart import CartItem
 import os
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 

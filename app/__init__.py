@@ -64,6 +64,24 @@ def create_app():
     cors.init_app(app)
     mail.init_app(app)
 
+
+    with app.app_context():
+        try:
+            db.create_all()
+            print("✅ Database tables created successfully!")
+            
+            # Optional: Check if specific tables exist
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            tables = inspector.get_table_names()
+            print(f"✅ Available tables: {tables}")
+            
+        except Exception as e:
+            print(f"❌ Error creating database tables: {e}")
+            # This will help diagnose the issue
+            import traceback
+            traceback.print_exc()
+
     #import and register blueprints
     from app.routes.auth_routes import auth_bp, google_bp
     from app.routes.admin import admin_bp

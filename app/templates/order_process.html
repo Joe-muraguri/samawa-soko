@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function initiatePayment() {
         try {
             // 1. Initiate M-Pesa STK Push
-            const response = await fetch('http://localhost:5000/api/checkout/initiate-payment', {
+            const response = await fetch('https://samawa.co.ke/api/checkout/initiate-payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

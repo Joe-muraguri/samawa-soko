@@ -62,12 +62,13 @@ def lipa_na_mpesa(phone_number,order_id):
 # @jwt_required()
 def checkout():
     cart = session.get('cart', {})
+    print("Current cart contents at checkout:", cart)
     if not cart:
         flash("Your cart is empty", "warning")
         return redirect(url_for('cart.view_cart'))
     
     total = sum(item['price'] * item['quantity'] for item in cart.values())
-    return render_template('checkout.html', cart_total=total)
+    return render_template('checkout.html', cart_total=total, cart=cart)
 
 @checkout_bp.route('/initiate-payment', methods=['POST'])
 
@@ -119,6 +120,10 @@ def initiate_payment():
         result = lipa_na_mpesa(phone, new_order.id)
         
         if result.get('ResponseCode') == '0':
+            print("M-Pesa payment initiated successfully:", result)
+            # For testing purposes, we can simulate the callback immediately
+            payment_callback()  # Simulate callback for testing purposes
+
             # Store pending order in session
             session['pending_order'] = {
                 'order_id': new_order.id,

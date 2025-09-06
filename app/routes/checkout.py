@@ -45,7 +45,7 @@ def lipa_na_mpesa(phone_number,order_id):
         "PartyA": phone_number,
         "PartyB": os.getenv('SHORT_CODE'),
         "PhoneNumber": phone_number,
-        "CallBackURL": "https://samawa.co.ke/callback",
+        "CallBackURL": "https://samawa.co.ke/checkout/callback",
         "AccountReference": str(order_id),
         "TransactionDesc": "Payment for order"
     }
@@ -189,15 +189,20 @@ def payment_callback():
             amount = next(item['Value'] for item in metadata if item['Name'] == 'Amount')
             phone = next(item['Value'] for item in metadata if item['Name'] == 'PhoneNumber')
             receipt = next(item['Value'] for item in metadata if item['Name'] == 'MpesaReceiptNumber')
-            order_id = next(item['Value'] for item in metadata if item['Name'] == 'MerchantRequestID')
+            MerchantRequestID = next(item['Value'] for item in metadata if item['Name'] == 'MerchantRequestID')
 
             print(f"Payment successful: Amount={amount}, Phone={phone}, Receipt={receipt}, Order ID={order_id}")
+
+            order_id = session.get('pending_order', {}).get('order_id')
+            print("Order ID from session:", order_id)
+
 
             # Update order status
             order = Order.query.get(order_id)
             if order:
+                # order.payment_receipt = receipt
+                order.total = amount
                 order.status = 'completed'
-                order.payment_receipt = receipt
                 db.session.commit()
                 print(f"Order {order_id} marked as completed.")
                 

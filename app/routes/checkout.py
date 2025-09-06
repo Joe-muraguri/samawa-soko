@@ -122,7 +122,7 @@ def initiate_payment():
         if result.get('ResponseCode') == '0':
             print("M-Pesa payment initiated successfully:", result)
             # For testing purposes, we can simulate the callback immediately
-            payment_callback()  # Simulate callback for testing purposes
+            # payment_callback()  # Simulate callback for testing purposes
 
             # Store pending order in session
             session['pending_order'] = {

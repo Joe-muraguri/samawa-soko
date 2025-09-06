@@ -167,7 +167,9 @@ def payment_callback():
             amount = next(item['Value'] for item in metadata if item['Name'] == 'Amount')
             phone = next(item['Value'] for item in metadata if item['Name'] == 'PhoneNumber')
             receipt = next(item['Value'] for item in metadata if item['Name'] == 'MpesaReceiptNumber')
-            order_id = next(item['Value'] for item in metadata if item['Name'] == 'AccountReference')
+            order_id = int(next(item['Value'] for item in metadata if item['Name'] == 'AccountReference'))
+            print("Order ID from callback metadata:", order_id)
+            
 
             print(f"Payment successful: Amount={amount}, Phone={phone}, Receipt={receipt}, Order ID={order_id}")
 

@@ -113,12 +113,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 console.log('Payment status response:', data);
                 
-                if (data.payment_status === 'completed') {
+                if (data.status === 'completed') {
                     clearInterval(interval);
                     showPaymentSuccess(orderId, data.delivery_date);
                     
                     // Send confirmation email/SMS
-                    await fetch(`/order/confirm/${orderId}`, { method: 'POST' });
+                    //await fetch(`/order/confirm/${orderId}`, { method: 'POST' });
                     
                 } else if (attempts >= maxAttempts) {
                     clearInterval(interval);

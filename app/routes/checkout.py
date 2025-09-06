@@ -159,7 +159,7 @@ def check_payment(order_id):
         if not order:
             return jsonify({'payment_status': 'not_found'}), 404
         print("Checking payment status for order ID:", order_id)
-        print("Order status:", order.status)
+        print("Order status before check:", order.status)
         if order.status == 'completed':
             return jsonify({
                 'payment_status': 'completed',
@@ -199,6 +199,8 @@ def payment_callback():
                 order.status = 'completed'
                 order.payment_receipt = receipt
                 db.session.commit()
+                print(f"Order {order_id} marked as completed.")
+                
                 
                 # Clear cart
                 if 'cart' in session:

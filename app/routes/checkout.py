@@ -16,7 +16,7 @@ import requests
 
 checkout_bp = Blueprint('checkout', __name__)
 
-def lipa_na_mpesa(phone_number,order_id):
+def lipa_na_mpesa(phone_number,order_id,):
     token = generate_access_token()
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     shortCode = os.getenv('SHORT_CODE')  #sandbox -174379
@@ -45,7 +45,7 @@ def lipa_na_mpesa(phone_number,order_id):
         "PartyA": phone_number,
         "PartyB": os.getenv('SHORT_CODE'),
         "PhoneNumber": phone_number,
-        "CallBackURL": "https://samawa.co.ke/checkout/callback",
+        "CallBackURL": "https://samawa.co.ke/api/checkout/callback",
         "AccountReference": str(order_id),
         "TransactionDesc": "Payment for order"
     }
@@ -113,8 +113,8 @@ def initiate_payment():
         print("New order created with ID:", new_order.id)
 
         # Use the UUID field for payment reference
-        payment_reference = new_order.uuid
-        print("Payment reference (UUID):", payment_reference)
+        # payment_reference = new_order.uuid
+        # print("Payment reference (UUID):", payment_reference)
 
         # Initiate M-Pesa payment
         result = lipa_na_mpesa(phone, new_order.id)
@@ -151,30 +151,7 @@ def initiate_payment():
             'message': str(e)
         }), 500
 
-@checkout_bp.route('/check-payment/<order_id>', methods=['GET'])
 
-def check_payment(order_id):
-    try:
-        order = Order.query.get(order_id)
-        if not order:
-            return jsonify({'payment_status': 'not_found'}), 404
-        print("Checking payment status for order ID:", order_id)
-        print("Order status before check:", order.status)
-        if order.status == 'completed':
-            return jsonify({
-                'payment_status': 'completed',
-                'delivery_date': (datetime.utcnow() + timedelta(days=3)).strftime('%Y-%m-%d')
-            })
-        elif order.status == 'failed':
-            return jsonify({'payment_status': 'failed'})
-        else:
-            return jsonify({'payment_status': 'pending'})
-
-    except Exception as e:
-        return jsonify({
-            'payment_status': 'error',
-            'message': str(e)
-        }), 500
 
 @checkout_bp.route('/callback', methods=['POST'])
 def payment_callback():
@@ -182,6 +159,7 @@ def payment_callback():
         callback_data = request.json
         print("Callback data received:", callback_data)
         result_code = callback_data['Body']['stkCallback']['ResultCode']
+        CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
         
         if result_code == 0:
             # Extract payment details
@@ -189,12 +167,12 @@ def payment_callback():
             amount = next(item['Value'] for item in metadata if item['Name'] == 'Amount')
             phone = next(item['Value'] for item in metadata if item['Name'] == 'PhoneNumber')
             receipt = next(item['Value'] for item in metadata if item['Name'] == 'MpesaReceiptNumber')
-            MerchantRequestID = next(item['Value'] for item in metadata if item['Name'] == 'MerchantRequestID')
+            order_id = next(item['Value'] for item in metadata if item['Name'] == 'AccountReference')
 
             print(f"Payment successful: Amount={amount}, Phone={phone}, Receipt={receipt}, Order ID={order_id}")
 
-            order_id = session.get('pending_order', {}).get('order_id')
-            print("Order ID from session:", order_id)
+            # order_id = session.get('pending_order', {}).get('order_id')
+            # print("Order ID from session:", order_id)
 
 
             # Update order status
@@ -217,3 +195,28 @@ def payment_callback():
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@checkout_bp.route('/check-payment/<order_id>', methods=['GET'])
+def check_payment(order_id):
+    try:
+        order = Order.query.get(order_id)
+        if not order:
+            return jsonify({'payment_status': 'not_found'}), 404
+        print("Checking payment status for order ID:", order_id)
+        print("Order status before check:", order.status)
+        if order.status == 'completed':
+            return jsonify({
+                'payment_status': 'completed',
+                'delivery_date': (datetime.utcnow() + timedelta(days=3)).strftime('%Y-%m-%d')
+            })
+        elif order.status == 'failed':
+            return jsonify({'payment_status': 'failed'})
+        else:
+            return jsonify({'payment_status': 'pending'})
+
+    except Exception as e:
+        return jsonify({
+            'payment_status': 'error',
+            'message': str(e)
+        }), 500

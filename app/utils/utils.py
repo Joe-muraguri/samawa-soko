@@ -2,7 +2,7 @@ from functools import wraps
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
 from werkzeug.utils import secure_filename
-from app.config import S3_BUCKET, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY, s3
+from app.config import S3_BUCKET, s3
 
 
 def role_required(required_role):

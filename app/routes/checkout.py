@@ -16,7 +16,7 @@ import requests
 
 checkout_bp = Blueprint('checkout', __name__)
 
-def lipa_na_mpesa(phone_number,order_id,):
+def lipa_na_mpesa(phone_number):
     token = generate_access_token()
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     shortCode = os.getenv('SHORT_CODE')  #sandbox -174379
@@ -46,7 +46,7 @@ def lipa_na_mpesa(phone_number,order_id,):
         "PartyB": os.getenv('SHORT_CODE'),
         "PhoneNumber": phone_number,
         "CallBackURL": "https://samawa.co.ke/api/checkout/callback",
-        "AccountReference": str(order_id),
+        "AccountReference": "Online payment",
         "TransactionDesc": "Payment for order"
     }
 
@@ -117,7 +117,7 @@ def initiate_payment():
         # print("Payment reference (UUID):", payment_reference)
 
         # Initiate M-Pesa payment
-        result = lipa_na_mpesa(phone, new_order.id)
+        result = lipa_na_mpesa(phone)
         
         if result.get('ResponseCode') == '0':
             print("M-Pesa payment initiated successfully:", result)
@@ -163,7 +163,9 @@ def payment_callback():
         CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
 
         #Get pending order from session
-        order_id = session.get('pending_order', {}).get('order_id')
+        pending_order = session.get('pending_order')
+        order_id = pending_order.get('order_id')
+
         print("Order ID from session:", order_id)
         
         if result_code == 0:

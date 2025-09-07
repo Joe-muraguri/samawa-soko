@@ -65,7 +65,7 @@ def create_product():
                 S3_BUCKET,
                 f"products/{unique_filename}",
                 ExtraArgs={
-                    "ACL": "public-read",
+                    
                     "ContentType": file.content_type
                 }
             )

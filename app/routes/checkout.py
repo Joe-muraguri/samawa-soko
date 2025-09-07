@@ -159,6 +159,7 @@ def payment_callback():
         callback_data = request.json
         print("Callback data received:", callback_data)
         result_code = callback_data['Body']['stkCallback']['ResultCode']
+        print("Result code from callback:", result_code)
         CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
         
         if result_code == 0:

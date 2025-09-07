@@ -183,6 +183,7 @@ def payment_callback():
                 # order.payment_receipt = receipt
                 order.total = amount
                 order.status = 'completed'
+                order.MpesaReceipt = receipt
                 db.session.commit()
                 print(f"Order {order_id} marked as completed.")
                 

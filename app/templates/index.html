@@ -35,7 +35,7 @@
             {% for product in products %}
                 <div class="border p-4 rounded hover:shadow-md">
                     <a href="{{ url_for('product.get_product', id=product.id) }}">
-                        <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" class="h-32 w-full object-cover mb-2" />
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="h-32 w-full object-cover mb-2" />
                         <p class="font-medium">{{ product.name }}</p>
                         <span class="ml-4 text-sm {% if product.stock > 0 %}text-green-600{% else %}text-red-600{% endif %}">
                             {% if product.stock > 0 %}

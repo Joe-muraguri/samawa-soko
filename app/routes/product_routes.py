@@ -5,6 +5,12 @@ from app import db
 from app.models.product import Product
 import os
 from werkzeug.utils import secure_filename
+import uuid
+from app.config import S3_BUCKET, s3
+
+
+
+
 
 product_bp = Blueprint('product', __name__)
 
@@ -35,7 +41,6 @@ def allowed_file(filename):
 # @role_required('admin')
 def create_product():
     if request.method == 'POST':
-        
         name = request.form.get("name")
         description = request.form.get("description")
         price = request.form.get("price")
@@ -45,31 +50,38 @@ def create_product():
         print("Form data:", request.form)
         print("Files:", request.files)
 
+        # Validate image file
         if not file or not allowed_file(file.filename):
-            return jsonify({"Error":"Invalid image file"}), 400
-        # if not file:
-        #     return jsonify({"message":"Image file is required"}), 400
-        
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+            return jsonify({"Error": "Invalid image file"}), 400
 
-            #make file name unique
-            import uuid
-            unique_filename = f"{uuid.uuid4().hex}_{filename}"
-            upload_folder = os.path.join('static', 'images')
-            os.makedirs(upload_folder, exist_ok=True)
-            file_path = os.path.join(upload_folder, unique_filename)
-            file.save(file_path)
-            image_url = f"images/{unique_filename}"
-        else:
-            return jsonify({"message":"Invalid image file"}), 400
-        
+        # Generate a unique file name
+        filename = secure_filename(file.filename)
+        unique_filename = f"{uuid.uuid4().hex}_{filename}"
 
-        # validate required fields
+        try:
+            # Upload to S3
+            s3.upload_fileobj(
+                file,
+                S3_BUCKET,
+                f"products/{unique_filename}",
+                ExtraArgs={
+                    "ACL": "public-read",
+                    "ContentType": file.content_type
+                }
+            )
 
+            # Get public image URL from S3
+            image_url = f"https://{S3_BUCKET}.s3.amazonaws.com/products/{unique_filename}"
+
+        except Exception as e:
+            print("S3 Upload Error:", e)
+            return jsonify({"Error": "Failed to upload image"}), 500
+
+        # Validate required fields
         if not name or not price or not description:
-            return jsonify({"message":"Missing required fields"}), 400
-        
+            return jsonify({"message": "Missing required fields"}), 400
+
+        # Save product to database
         product = Product(
             name=name,
             description=description,
@@ -81,13 +93,13 @@ def create_product():
         db.session.add(product)
         db.session.commit()
 
+        # Handle AJAX request or normal form submission
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({"message": "Product created successfully"}), 200
         else:
             flash("Product created successfully", "success")
-            return redirect(url_for('create_product'))  # Or just render the page again
-        
-        # redirect(url_for('home'))
+            return redirect(url_for('product_bp.create_product'))
+
     return render_template('create_product.html')
     #! return jsonify({"message":"Product added successfully"}), 201  For API end point
 

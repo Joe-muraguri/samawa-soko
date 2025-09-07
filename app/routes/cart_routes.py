@@ -13,15 +13,16 @@ cart_bp = Blueprint('cart', __name__)
 @cart_bp.route('/<int:product_id>/add_cart', methods=['POST'])
 # @jwt_required()
 def add_to_cart(product_id):
+    print("Add to cart called")
     cart = get_cart_data(session)
     # if not current_user.is_authenticated:
     #     return jsonify({
     #         "message":"Please login to continue",
     #         "login_url": url_for('login')
     #     }), 401 #unauthorized
-    user_id =1  #get_jwt_identity()
+    # user_id =1  #get_jwt_identity()
     data = request.get_json()
-    print("Data received:", data)
+    print("Data received from database of the product to add to cart:", data)
     product_id = str(data.get('product_id'))
     quantity = int(data.get('quantity', 1))
     

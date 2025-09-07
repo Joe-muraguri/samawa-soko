@@ -168,6 +168,7 @@ def payment_callback():
         result_code = callback_data['Body']['stkCallback']['ResultCode']
         print("Result code from callback:", result_code)
         CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
+        print("CheckoutRequestID from callback:", CheckoutRequestID)
 
         order = None
         if CheckoutRequestID:

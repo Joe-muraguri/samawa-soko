@@ -161,6 +161,10 @@ def payment_callback():
         result_code = callback_data['Body']['stkCallback']['ResultCode']
         print("Result code from callback:", result_code)
         CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
+
+        #Get pending order from session
+        order_id = session.get('pending_order', {}).get('order_id')
+        print("Order ID from session:", order_id)
         
         if result_code == 0:
             print("Payment successful, processing details...")
@@ -171,8 +175,8 @@ def payment_callback():
             phone = next(item['Value'] for item in metadata if item['Name'] == 'PhoneNumber')
             receipt = next(item['Value'] for item in metadata if item['Name'] == 'MpesaReceiptNumber')
             print("Receipt number from callback metadata:", receipt)
-            order_id = int(next(item['Value'] for item in metadata if item['Name'] == 'AccountReference'))
-            print("Order ID from callback metadata:", order_id)
+            
+            
             
 
             print(f"Payment successful: Amount={amount}, Phone={phone}, Receipt={receipt}, Order ID={order_id}")

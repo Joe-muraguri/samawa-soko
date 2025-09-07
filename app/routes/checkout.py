@@ -163,11 +163,14 @@ def payment_callback():
         CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
         
         if result_code == 0:
+            print("Payment successful, processing details...")
             # Extract payment details
             metadata = callback_data['Body']['stkCallback']['CallbackMetadata']['Item']
+            print("Callback metadata items:", metadata)
             amount = next(item['Value'] for item in metadata if item['Name'] == 'Amount')
             phone = next(item['Value'] for item in metadata if item['Name'] == 'PhoneNumber')
             receipt = next(item['Value'] for item in metadata if item['Name'] == 'MpesaReceiptNumber')
+            print("Receipt number from callback metadata:", receipt)
             order_id = int(next(item['Value'] for item in metadata if item['Name'] == 'AccountReference'))
             print("Order ID from callback metadata:", order_id)
             

@@ -10,6 +10,8 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default='Pending')  #! Shipped||Delivered||Paid||pending
+    MpesaReceipt = db.Column(db.String(20), nullable=True)
+    checkout_request_id = db.Column(db.String(100), nullable=True, unique=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     user = db.relationship('User', backref='orders', lazy=True)

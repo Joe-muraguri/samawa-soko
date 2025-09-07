@@ -168,8 +168,8 @@ def payment_callback():
         result_code = stk_callback.get('ResultCode')
         checkout_request_id = stk_callback.get('CheckoutRequestID')
         
-        print("Result code:", result_code)
-        print("CheckoutRequestID:", checkout_request_id)
+        print("Callback Result code:", result_code)
+        print("Callback CheckoutRequestID fr:", checkout_request_id)
 
         if not checkout_request_id:
             print("No CheckoutRequestID in callback")
@@ -194,13 +194,15 @@ def payment_callback():
             
             print("Payment data extracted:", payment_data)
             
+            if 'Amount' in payment_data:
+                order.total = payment_data['Amount']
             # Update order with payment details
+            order.total = payment_data.get('Amount')
             order.status = 'completed'
             order.MpesaReceipt = payment_data.get('MpesaReceiptNumber')
             
             
-            if 'Amount' in payment_data:
-                order.total = payment_data['Amount']
+            
             
             db.session.commit()
             print(f"Order {order.id} marked as completed with receipt {order.MpesaReceipt}")
@@ -229,21 +231,21 @@ def check_payment(order_id):
     try:
         order = Order.query.get(order_id)
         if not order:
-            return jsonify({'payment_status': 'not_found'}), 404
+            return jsonify({'status': 'not_found'}), 404
         print("Checking payment status for order ID:", order_id)
         print("Order status before check:", order.status)
         if order.status == 'completed':
             return jsonify({
-                'payment_status': 'completed',
+                'status': 'completed',
                 'delivery_date': (datetime.utcnow() + timedelta(days=3)).strftime('%Y-%m-%d')
             })
         elif order.status == 'failed':
-            return jsonify({'payment_status': 'failed'})
+            return jsonify({'status': 'failed'})
         else:
-            return jsonify({'payment_status': 'pending'})
+            return jsonify({'status': 'pending'})
 
     except Exception as e:
         return jsonify({
-            'payment_status': 'error',
+            'status': 'error',
             'message': str(e)
         }), 500

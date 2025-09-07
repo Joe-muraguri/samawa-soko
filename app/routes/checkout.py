@@ -71,7 +71,6 @@ def checkout():
     return render_template('checkout.html', cart_total=total, cart=cart)
 
 @checkout_bp.route('/initiate-payment', methods=['POST'])
-
 def initiate_payment():
     try:
         data = request.get_json()
@@ -79,7 +78,6 @@ def initiate_payment():
         if phone.startswith('07'):
             phone = '254' + phone[1:]
         print("Phone number to use is:", phone)
-        
         
         if not phone:
             return jsonify({
@@ -97,50 +95,48 @@ def initiate_payment():
         total = sum(item['price'] * item['quantity'] for item in cart.values())
         print("Total amount to be paid:", total)
         print("Cart contents:", cart)
-        # order_id = uuid.uuid4()
 
         # Create order record
         new_order = Order(
-            
             user_id=None,
             total=total,
             status='pending',
-            
         )
         db.session.add(new_order)
+        db.session.flush()  # Flush to get the ID without committing
+
+        # Create order items
+        for product_id, item_data in cart.items():
+            product = Product.query.get(product_id)
+            if product:
+                order_item = OrderItem(
+                    order_id=new_order.id,
+                    product_id=product_id,
+                    quantity=item_data['quantity'],
+                    price=item_data['price']
+                )
+                db.session.add(order_item)
+
         db.session.commit()
-
         print("New order created with ID:", new_order.id)
-
-        # Use the UUID field for payment reference
-        # payment_reference = new_order.uuid
-        # print("Payment reference (UUID):", payment_reference)
 
         # Initiate M-Pesa payment
         result = lipa_na_mpesa(phone)
 
         checkout_id = result.get('CheckoutRequestID')
         print("CheckoutRequestID received:", checkout_id)
+        
         if checkout_id:
             new_order.checkout_request_id = checkout_id
             db.session.commit()
         
         if result.get('ResponseCode') == '0':
             print("M-Pesa payment initiated successfully:", result)
-            # For testing purposes, we can simulate the callback immediately
-            # payment_callback()  # Simulate callback for testing purposes
-
-            # Store pending order in session
-            # session['pending_order'] = {
-            #     'order_id': new_order.id,
-            #     'phone': phone,
-            #     'amount': total,
-            #     'created_at': datetime.utcnow().isoformat()
-            # }
             
             return jsonify({
                 'success': True,
                 'order_id': new_order.id,
+                'checkout_request_id': checkout_id,
                 'message': 'Payment initiated. Check your phone.'
             })
         else:
@@ -152,82 +148,81 @@ def initiate_payment():
             }), 400
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({
             'success': False,
             'message': str(e)
         }), 500
 
-
-
 @checkout_bp.route('/callback', methods=['POST'])
 def payment_callback():
-    
     try:
-        callback_data = request.json
-        print("Callback data received:", callback_data)
-        result_code = callback_data['Body']['stkCallback']['ResultCode']
-        print("Result code from callback:", result_code)
-        CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
-        print("CheckoutRequestID from callback:", CheckoutRequestID)
+        callback_data = request.get_json()
+        print("Raw callback data received:", callback_data)
+        
+        if not callback_data or 'Body' not in callback_data:
+            print("Invalid callback data structure")
+            return jsonify({'status': 'failed', 'message': 'Invalid callback data'}), 400
+        
+        stk_callback = callback_data['Body'].get('stkCallback', {})
+        result_code = stk_callback.get('ResultCode')
+        checkout_request_id = stk_callback.get('CheckoutRequestID')
+        
+        print("Result code:", result_code)
+        print("CheckoutRequestID:", checkout_request_id)
 
-        order = None
-        if CheckoutRequestID:
-            order = Order.query.filter_by(checkout_request_id=CheckoutRequestID).first()
-            print("Order fetched using CheckoutRequestID:", order)
+        if not checkout_request_id:
+            print("No CheckoutRequestID in callback")
+            return jsonify({'status': 'failed', 'message': 'No CheckoutRequestID'}), 400
+
+        # Find order by checkout_request_id
+        order = Order.query.filter_by(checkout_request_id=checkout_request_id).first()
         if not order:
-            print("No order found for CheckoutRequestID:", CheckoutRequestID)
+            print(f"No order found for CheckoutRequestID: {checkout_request_id}")
             return jsonify({'status': 'failed', 'message': 'Order not found'}), 404
 
-        #Get pending order from session
-        # pending_order = session.get('pending_order')
-        # order_id = pending_order.get('order_id')
-
-        
-        
         if result_code == 0:
             print("Payment successful, processing details...")
-            # Extract payment details
-            metadata = callback_data['Body']['stkCallback']['CallbackMetadata']['Item']
-            print("Callback metadata items:", metadata)
-            amount = next(item['Value'] for item in metadata if item['Name'] == 'Amount')
-            print("Amount from callback metadata:", amount)
-            phone = next(item['Value'] for item in metadata if item['Name'] == 'PhoneNumber')
-            print("Phone number from callback metadata:", phone)
-            receipt = next(item['Value'] for item in metadata if item['Name'] == 'MpesaReceiptNumber')
-            print("Receipt number from callback metadata:", receipt)
             
+            # Extract payment details safely
+            metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
+            payment_data = {}
             
+            for item in metadata:
+                if 'Name' in item and 'Value' in item:
+                    payment_data[item['Name']] = item['Value']
             
-
-            print(f"Payment successful: Amount={amount}, Phone={phone}, Receipt={receipt}")
-
-            # order_id = session.get('pending_order', {}).get('order_id')
-            # print("Order ID from session:", order_id)
-
-
-            # Update order status
+            print("Payment data extracted:", payment_data)
             
-            # order.payment_receipt = receipt
-            order.total = amount
+            # Update order with payment details
             order.status = 'completed'
-            order.MpesaReceipt = receipt
-            order.checkout_request_id = CheckoutRequestID
+            order.MpesaReceipt = payment_data.get('MpesaReceiptNumber')
+            
+            
+            if 'Amount' in payment_data:
+                order.total = payment_data['Amount']
+            
             db.session.commit()
-            print(f"Order {CheckoutRequestID} marked as completed.")
+            print(f"Order {order.id} marked as completed with receipt {order.MpesaReceipt}")
             
-            
-            # Clear cart
+            # Clear cart from session
             if 'cart' in session:
-                session.pop('cart')
-                
-                return jsonify({'status': 'success'}), 200
-        
-        return jsonify({'status': 'failed'}), 400
+                del session['cart']
+                session.modified = True
+            
+            return jsonify({'status': 'success'}), 200
+        else:
+            # Payment failed
+            order.status = 'failed'
+            db.session.commit()
+            print(f"Order {order.id} marked as failed. Result code: {result_code}")
+            return jsonify({'status': 'failed', 'message': 'Payment failed'}), 400
 
     except Exception as e:
         print("Error processing payment callback:", str(e))
+        import traceback
+        traceback.print_exc()
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
 
 @checkout_bp.route('/check-payment/<order_id>', methods=['GET'])
 def check_payment(order_id):

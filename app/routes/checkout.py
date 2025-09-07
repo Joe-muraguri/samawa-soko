@@ -173,6 +173,7 @@ def payment_callback():
         order = None
         if CheckoutRequestID:
             order = Order.query.filter_by(checkout_request_id=CheckoutRequestID).first()
+            print("Order fetched using CheckoutRequestID:", order)
         if not order:
             print("No order found for CheckoutRequestID:", CheckoutRequestID)
             return jsonify({'status': 'failed', 'message': 'Order not found'}), 404
@@ -189,7 +190,9 @@ def payment_callback():
             metadata = callback_data['Body']['stkCallback']['CallbackMetadata']['Item']
             print("Callback metadata items:", metadata)
             amount = next(item['Value'] for item in metadata if item['Name'] == 'Amount')
+            print("Amount from callback metadata:", amount)
             phone = next(item['Value'] for item in metadata if item['Name'] == 'PhoneNumber')
+            print("Phone number from callback metadata:", phone)
             receipt = next(item['Value'] for item in metadata if item['Name'] == 'MpesaReceiptNumber')
             print("Receipt number from callback metadata:", receipt)
             
@@ -222,6 +225,7 @@ def payment_callback():
         return jsonify({'status': 'failed'}), 400
 
     except Exception as e:
+        print("Error processing payment callback:", str(e))
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 

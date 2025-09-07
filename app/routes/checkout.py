@@ -118,6 +118,12 @@ def initiate_payment():
 
         # Initiate M-Pesa payment
         result = lipa_na_mpesa(phone)
+
+        checkout_id = result.get('CheckoutRequestID')
+        print("CheckoutRequestID received:", checkout_id)
+        if checkout_id:
+            new_order.checkout_request_id = checkout_id
+            db.session.commit()
         
         if result.get('ResponseCode') == '0':
             print("M-Pesa payment initiated successfully:", result)
@@ -125,12 +131,12 @@ def initiate_payment():
             # payment_callback()  # Simulate callback for testing purposes
 
             # Store pending order in session
-            session['pending_order'] = {
-                'order_id': new_order.id,
-                'phone': phone,
-                'amount': total,
-                'created_at': datetime.utcnow().isoformat()
-            }
+            # session['pending_order'] = {
+            #     'order_id': new_order.id,
+            #     'phone': phone,
+            #     'amount': total,
+            #     'created_at': datetime.utcnow().isoformat()
+            # }
             
             return jsonify({
                 'success': True,
@@ -155,6 +161,7 @@ def initiate_payment():
 
 @checkout_bp.route('/callback', methods=['POST'])
 def payment_callback():
+    
     try:
         callback_data = request.json
         print("Callback data received:", callback_data)
@@ -162,11 +169,18 @@ def payment_callback():
         print("Result code from callback:", result_code)
         CheckoutRequestID = callback_data['Body']['stkCallback']['CheckoutRequestID']
 
-        #Get pending order from session
-        pending_order = session.get('pending_order')
-        order_id = pending_order.get('order_id')
+        order = None
+        if CheckoutRequestID:
+            order = Order.query.filter_by(checkout_request_id=CheckoutRequestID).first()
+        if not order:
+            print("No order found for CheckoutRequestID:", CheckoutRequestID)
+            return jsonify({'status': 'failed', 'message': 'Order not found'}), 404
 
-        print("Order ID from session:", order_id)
+        #Get pending order from session
+        # pending_order = session.get('pending_order')
+        # order_id = pending_order.get('order_id')
+
+        
         
         if result_code == 0:
             print("Payment successful, processing details...")
@@ -181,26 +195,26 @@ def payment_callback():
             
             
 
-            print(f"Payment successful: Amount={amount}, Phone={phone}, Receipt={receipt}, Order ID={order_id}")
+            print(f"Payment successful: Amount={amount}, Phone={phone}, Receipt={receipt}")
 
             # order_id = session.get('pending_order', {}).get('order_id')
             # print("Order ID from session:", order_id)
 
 
             # Update order status
-            order = Order.query.get(order_id)
-            if order:
-                # order.payment_receipt = receipt
-                order.total = amount
-                order.status = 'completed'
-                order.MpesaReceipt = receipt
-                db.session.commit()
-                print(f"Order {order_id} marked as completed.")
-                
-                
-                # Clear cart
-                if 'cart' in session:
-                    session.pop('cart')
+            
+            # order.payment_receipt = receipt
+            order.total = amount
+            order.status = 'completed'
+            order.MpesaReceipt = receipt
+            order.checkout_request_id = CheckoutRequestID
+            db.session.commit()
+            print(f"Order {CheckoutRequestID} marked as completed.")
+            
+            
+            # Clear cart
+            if 'cart' in session:
+                session.pop('cart')
                 
                 return jsonify({'status': 'success'}), 200
         

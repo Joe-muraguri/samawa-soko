@@ -267,8 +267,9 @@ def send_sms(order,phone_number):
             body=f"Your order {order.id} has been confirmed. Total: {order.total}. Thank you for shopping with us!",
             from_=os.getenv('TWILIO_PHONE_NUMBER'),
             to=f"+{phone_number}"
-            print(f"SMS will be sent to {phone_number}")
+            
         )
+        print(f"SMS will be sent to {phone_number}")
         print("SMS sent successfully:", message.sid)
     except Exception as e:
         print("Failed to send SMS:", str(e)) 

@@ -80,8 +80,9 @@ def initiate_payment():
     try:
         data = request.get_json()
         phone = data.get('phone')
-        CUSTOMER_EMAIL = data.get('email')
-        print("Customer email is:", CUSTOMER_EMAIL)
+        email = data.get('email')
+        session['customer_email'] = email
+        print("Customer email from frontend is:", email)
         if phone.startswith('07'):
             phone = '254' + phone[1:]
         print("Phone number to use is:", phone)
@@ -223,7 +224,7 @@ def payment_callback():
             # Example after payment success
             print("Customer email to use is:", CUSTOMER_EMAIL)
             send_email_with_pdf(
-                to_email=CUSTOMER_EMAIL,
+                to_email=session.get('customer_email'), 
                 order_id=order.id,
                 amount=order.total,
                 phone=phone_number,

@@ -6,7 +6,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from datetime import datetime
 
-def generate_styled_pdf(order_id, amount, phone, shipping_details, expected_time):
+def generate_pdf(order_id, amount, phone, shipping_details, expected_time):
     # Create buffer for PDF
     buffer = io.BytesIO()
     

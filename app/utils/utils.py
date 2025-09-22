@@ -5,6 +5,8 @@ from werkzeug.utils import secure_filename
 from app.config import S3_BUCKET, s3
 import os
 from app.utils.pdf_generate import generate_pdf
+import smtplib
+from email.message import EmailMessage
 
 
 def role_required(required_role):
@@ -67,8 +69,7 @@ def send_sms(message, mobile):
     except Exception as e:
         print("Error:", str(e))
 
-import smtplib
-from email.message import EmailMessage
+
 
 def send_email_with_pdf(to_email, order_id, amount, phone, shipping_details, expected_time):
     # Generate PDF

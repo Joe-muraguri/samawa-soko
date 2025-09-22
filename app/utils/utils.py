@@ -4,6 +4,7 @@ from flask_jwt_extended import get_jwt_identity
 from werkzeug.utils import secure_filename
 from app.config import S3_BUCKET, s3
 import os
+from app.utils.pdf_generate import generate_pdf
 
 
 def role_required(required_role):
@@ -65,6 +66,36 @@ def send_sms(message, mobile):
 
     except Exception as e:
         print("Error:", str(e))
+
+import smtplib
+from email.message import EmailMessage
+
+def send_email_with_pdf(to_email, order_id, amount, phone, shipping_details, expected_time):
+    # Generate PDF
+    pdf_buffer = generate_pdf(order_id, amount, phone, shipping_details, expected_time)
+
+    # Create email
+    msg = EmailMessage()
+    msg["Subject"] = "Your Order Receipt"
+    msg["From"] = "joewarutere97@gmail.com"
+    msg["To"] = to_email
+    msg.set_content(
+        f"Dear Customer,\n\nThank you for your payment.\nYour order {order_id} has been received.\n\nRegards,\nSAMAWATI"
+    )
+
+    # Attach PDF
+    msg.add_attachment(
+        pdf_buffer.read(),
+        maintype="application",
+        subtype="pdf",
+        filename=f"receipt_{order_id}.pdf",
+    )
+
+    # Send email
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login("joewarutere97@gmail.com", "kanjuriz")
+        server.send_message(msg)
+    print("Email sent successfully.")
 
 
 

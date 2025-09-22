@@ -69,7 +69,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Start payment processing immediately
     initiatePayment();
-
+    const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
+    console.log("Checkout Data:", checkoutData);
     async function initiatePayment() {
         try {
             // 1. Initiate M-Pesa STK Push
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     // Include any necessary checkout data
                     amount: 1,
-                    phone: '0717988187'
+                    phone: checkoutData.phone
                 })
             });
 

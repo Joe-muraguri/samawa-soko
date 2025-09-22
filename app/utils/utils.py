@@ -94,7 +94,7 @@ def send_email_with_pdf(to_email, order_id, amount, phone, shipping_details, exp
 
     # Send email
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login("joewarutere97@gmail.com", "kanjuriz")
+        server.login("joewarutere97@gmail.com", "cazn nzlv btdu guph")
         server.send_message(msg)
     print("Email sent successfully.")
 

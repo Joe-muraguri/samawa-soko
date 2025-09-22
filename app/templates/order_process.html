@@ -68,9 +68,15 @@
     
 document.addEventListener('DOMContentLoaded', function() {
     // Start payment processing immediately
-    initiatePayment();
+    
     const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
     console.log("Checkout Data:", checkoutData);
+
+    if (!checkoutData.phone) {
+        console.error("Missing phone number in checkout data");
+        return
+    }
+    initiatePayment();
     async function initiatePayment() {
         try {
             // 1. Initiate M-Pesa STK Push

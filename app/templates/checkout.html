@@ -95,17 +95,20 @@
             <p class="text-green-600">90% off : -KSh 288</p>
             <p class="font-bold">Total: KSh 2,642</p>
         </div>
-        
-        <button id="confirmOrderBtn" class="w-full mt-6 bg-orange-500 text-white py-2 rounded-lg">
-            CONFIRM ORDER & PAY
-        </button>
+        <a href="{{ url_for('order.order_process') }}" id="confirmOrder">
+            <button  class="w-full mt-6 bg-orange-500 text-white py-2 rounded-lg">
+                CONFIRM ORDER & PAY
+            </button>
+        </a>
     
     </div>
 </div>
 </div>
 
 <script>
-document.getElementById("confirmOrderBtn").addEventListener("click", () => {
+document.getElementById("confirmOrder").addEventListener("click", (event) => {
+    event.preventDefault();
+
   const phone = document.getElementById("phone").value;
   const firstName = document.getElementById("firstName").value;
   const town = document.getElementById("town").value;
@@ -123,7 +126,7 @@ document.getElementById("confirmOrderBtn").addEventListener("click", () => {
   }));
 
   // Now go to order_process.html
-  window.location.href = "{{ url_for('order.order_process') }}";
+  window.location.href = this.getAttribute("href");
 });
 </script>
 

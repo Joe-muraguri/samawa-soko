@@ -14,6 +14,7 @@ import os
 import base64
 import requests
 from twilio.rest import Client
+from app.utils.utils import send_sms
 
 
 checkout_bp = Blueprint('checkout', __name__)
@@ -203,7 +204,8 @@ def payment_callback():
             order.status = 'completed'
             order.MpesaReceipt = payment_data.get('MpesaReceiptNumber')
             
-            
+            sms_message = f"Your payment of KES {order.total} was successful. Receipt: {order.MpesaReceipt}. Thank you for shopping with us!"
+            print("SMS message to be sent:", sms_message)
             
             
             db.session.commit()
@@ -213,7 +215,7 @@ def payment_callback():
                 if item.get('Name') == 'PhoneNumber':
                     phone_number = item.get('Value')
                     
-            send_sms(order,phone_number)
+            send_sms(sms_message,phone_number)
             
             # Clear cart from session
             if 'cart' in session:
@@ -258,19 +260,3 @@ def check_payment(order_id):
             'message': str(e)
         }), 500
     
-def send_sms(order,phone_number):
-    try:
-        account_sid = os.getenv('TWILIO_ACCOUNT_SID')
-        auth_token = os.getenv('TWILIO_AUTH_TOKEN')
-        client = Client(account_sid, auth_token)
-        message = client.messages.create(
-            body=f"Your order {order.id} has been confirmed. Total: {order.total}. Thank you for shopping with us!",
-            from_=os.getenv('TWILIO_PHONE_NUMBER'),
-            to=f"+{phone_number}"
-            
-        )
-        print(f"SMS will be sent to {phone_number}")
-        print("SMS sent successfully:", message.sid)
-    except Exception as e:
-        print("Failed to send SMS:", str(e)) 
-        return jsonify({"message":"Order not found"}), 404

@@ -12,6 +12,10 @@ class Order(db.Model):
     status = db.Column(db.String(20), default='Pending')  #! Shipped||Delivered||Paid||pending
     MpesaReceipt = db.Column(db.String(20), nullable=True)
     checkout_request_id = db.Column(db.String(100), nullable=True, unique=True)
+    customer_email = db.Column(db.String(120), nullable=True)
+    customer_name = db.Column(db.String(120), nullable=True)
+    customer_address = db.Column(db.String(200), nullable=True)
+    customer_phone = db.Column(db.String(20), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
 
     user = db.relationship('User', backref='orders', lazy=True)

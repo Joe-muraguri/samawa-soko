@@ -81,6 +81,8 @@ def initiate_payment():
         data = request.get_json()
         phone = data.get('phone')
         email = data.get('email')
+        name = data.get('firstName')
+        address = f"{data.get('town')}, {data.get('city')}"
         session['customer_email'] = email
         print("Customer email from frontend is:", email)
         if phone.startswith('07'):
@@ -109,6 +111,10 @@ def initiate_payment():
             user_id=None,
             total=total,
             status='pending',
+            customer_email =email,
+            customer_phone=phone,
+            customer_name=name,
+            customer_address=address
         )
         db.session.add(new_order)
         db.session.flush()  # Flush to get the ID without committing
@@ -224,11 +230,11 @@ def payment_callback():
             # Example after payment success
             print("Customer email to use is:", CUSTOMER_EMAIL)
             send_email_with_pdf(
-                to_email=session.get('customer_email'), 
+                to_email=order.customer_email,
                 order_id=order.id,
                 amount=order.total,
                 phone=phone_number,
-                shipping_details="Nairobi, Kenya",
+                shipping_details=order.customer_address,
                 expected_time="3-5 business days"
             )
 

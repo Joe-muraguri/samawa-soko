@@ -126,7 +126,8 @@ document.getElementById("confirmOrder").addEventListener("click", (event) => {
   }));
 
   // Now go to order_process.html
-  window.location.href = this.getAttribute("href");
+  const checkoutLink = document.getElementById("confirmOrder").getAttribute("href");
+  window.location.href = checkoutLink;
 });
 </script>
 

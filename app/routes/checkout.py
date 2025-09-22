@@ -221,6 +221,7 @@ def payment_callback():
                     
             send_sms(sms_message,phone_number)
             # Example after payment success
+            print("Customer email to use is:", CUSTOMER_EMAIL)
             send_email_with_pdf(
                 to_email=CUSTOMER_EMAIL,
                 order_id=order.id,

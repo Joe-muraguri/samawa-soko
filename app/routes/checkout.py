@@ -19,6 +19,8 @@ from app.utils.utils import send_sms, send_email_with_pdf
 
 checkout_bp = Blueprint('checkout', __name__)
 
+CUSTOMER_EMAIL = ""
+
 def lipa_na_mpesa(phone_number):
     token = generate_access_token()
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
@@ -78,6 +80,8 @@ def initiate_payment():
     try:
         data = request.get_json()
         phone = data.get('phone')
+        CUSTOMER_EMAIL = data.get('email')
+        print("Customer email is:", CUSTOMER_EMAIL)
         if phone.startswith('07'):
             phone = '254' + phone[1:]
         print("Phone number to use is:", phone)
@@ -218,7 +222,7 @@ def payment_callback():
             send_sms(sms_message,phone_number)
             # Example after payment success
             send_email_with_pdf(
-                to_email="joe.crrm@gmail.com",
+                to_email=CUSTOMER_EMAIL,
                 order_id=order.id,
                 amount=order.total,
                 phone=phone_number,

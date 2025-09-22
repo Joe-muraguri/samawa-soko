@@ -21,6 +21,7 @@
                 <option>Kenya</option>
             </select>
             <input type="text" id="firstName" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="First name" />
+            <input type="email" id="email" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="Email" />
             <input type="text" id="town" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="Enter your Town" />
             <input type="text" id="city" class="w-full border border-gray-300 rounded-md px-3 py-2 mt-2" placeholder="Enter your city" />
             
@@ -111,6 +112,7 @@ document.getElementById("confirmOrder").addEventListener("click", (event) => {
 
   const phone = document.getElementById("phone").value;
   const firstName = document.getElementById("firstName").value;
+  const email = document.getElementById("email").value;
   const town = document.getElementById("town").value;
   const city = document.getElementById("city").value;
   const shipping = document.querySelector('input[name="shipping"]:checked')?.value || '';
@@ -121,6 +123,7 @@ document.getElementById("confirmOrder").addEventListener("click", (event) => {
   localStorage.setItem("checkoutData", JSON.stringify({
     phone,
     firstName,
+    email,
     town,
     city
   }));

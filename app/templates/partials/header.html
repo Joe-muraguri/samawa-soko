@@ -35,7 +35,8 @@
                 <!-- </a> --> 
                 <a href="{{ url_for('cart.view_cart')}}" class="text-gray-600 hover:text-indigo-600 relative">
                     <i class="fas fa-shopping-cart text-lg absolute"></i>
-                    <span class="absolute -top-2 -right-2 bg-pink-500 text-white rounded-full text-xs h-5 w-5 flex items-center justify-center">{{ cartCount or 0 }}</span>
+                    {% if cart_count > 0 %}
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white rounded-full text-xs h-5 w-5 flex items-center justify-center">{{ cart_count }}</span>
                 </a>
                 <!-- <a href="{{ url_for('auth.google_login')}}" class="text-gray-700 hover:text-indigo-600 transition-colors">
                     <i class="fas fa-user text-xl"></i>
@@ -58,6 +59,25 @@
     </header>
 
     <script>
+
+        async function addToCart(productId, quantity = 1) {
+            const response = await fetch(`/${productId}/add_cart`, {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ product_id: productId, quantity: quantity }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // update cart count in header without page reload
+                document.getElementById("cart-count").textContent = data.cart_count;
+            } else {
+                alert(data.message || "Error adding to cart");
+            }
+        }
+
         // Update cart counter dynamically
         function updateCartCounter(count) {
             const counter = document.getElementById('cart-counter');
@@ -70,6 +90,8 @@
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
         });
+
+
 
         // Initialize with 0 items (or load from your backend)
     </script>

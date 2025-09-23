@@ -47,6 +47,7 @@ def add_to_cart(product_id):
             'image_url': product.image_url if hasattr(product, 'image_url') else None
         }
     # save the cart back to the session
+    session['cart'] = cart
     session.modified = True
 
     #Calculate the cart totals

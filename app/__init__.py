@@ -54,6 +54,8 @@ def create_app():
     def inject_cart_count():
         cart = session.get('cart', {})
         total_quantity = sum(item['quantity'] for item in cart.values())
+        print(f"Cart count injected: {total_quantity}")
+        
         return dict(cart_count=total_quantity)
 
     

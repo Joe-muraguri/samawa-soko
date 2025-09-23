@@ -132,44 +132,47 @@
         const display = document.getElementById(`qty-display-${productId}`);
         let currentQuantity = parseInt(display.textContent);
         currentQuantity += change;
+
         if (currentQuantity < 1) {
             alert('Quantity cannot be less than 1.');
             return;
         }
+
         display.textContent = currentQuantity;
 
         try {
             const response = await fetch(`https://samawa.co.ke/api/cart/update/${productId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({product_id: productId, quantity: currentQuantity})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId, quantity: currentQuantity })
             });
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+
             const data = await response.json();
+
             if (!data.success) {
                 alert('Failed to update cart');
-                display.textContent = currentQuantity; // Revert quantity on error
+                return; // stop further execution
             }
-        }
-        catch (error) {
+
+            // ✅ Update cart page totals
+            document.getElementById('cart-total').textContent = data.totals.subtotal.toFixed(2);
+            document.getElementById('subtotal').textContent = data.totals.subtotal.toFixed(2);
+            document.getElementById('discount').textContent = data.totals.discount.toFixed(2);
+            document.getElementById('checkout-total').textContent = data.totals.total.toFixed(2);
+
+            // ✅ Update the header cart badge
+            updateCartCounter(data.totals.cart_count);
+
+        } catch (error) {
             console.error('Error updating cart:', error);
             alert('An error occurred while updating the cart. Please try again.');
-            display.textContent = currentQuantity; // Revert quantity on error
         }
-
-        document.getElementById('cart-total').textContent = data.totals.subtotal.toFixed(2);
-        document.getElementById('subtotal').textContent = data.totals.subtotal.toFixed(2);
-        document.getElementById('discount').textContent = data.totals.discount.toFixed(2);
-        document.getElementById('checkout-total').textContent = data.totals.total.toFixed(2);
-
-
-    } {
-        
     }
+
 </script>
  
 <!-- <script>

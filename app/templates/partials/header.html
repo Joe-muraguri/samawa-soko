@@ -62,7 +62,7 @@
     <script>
 
         async function addToCart(productId, quantity = 1) {
-            const response = await fetch(`/${productId}/add_cart`, {
+            const response = await fetch(`https://samawa.co.ke/api/cart/${productId}/add_cart`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",

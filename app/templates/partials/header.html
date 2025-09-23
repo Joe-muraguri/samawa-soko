@@ -68,9 +68,11 @@
                 "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ product_id: productId, quantity: quantity }),
+                
             });
 
             const data = await response.json();
+            console.log("Add to cart response:", data); // Debugging line
             if (data.success) {
                 // update cart count in header without page reload
                 document.getElementById("cart-count").textContent = data.cart_count;
@@ -81,7 +83,7 @@
 
         // Update cart counter dynamically
         function updateCartCounter(count) {
-            const counter = document.getElementById('cart-counter');
+            const counter = document.getElementById('cart-count');
             counter.textContent = count;
             counter.classList.toggle('hidden', count === 0);
         }

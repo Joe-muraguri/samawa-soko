@@ -26,6 +26,15 @@ def create_app():
     @app.route('/')
     def homepage():
         return redirect('/api/products/')
+    
+    
+    @app.route('/about')
+    def about():
+        return render_template('about.html')
+    
+   
+    
+
 
     # In your Flask app configuration
     app.config['SECRET_KEY'] = 'warutere'
@@ -55,7 +64,7 @@ def create_app():
         cart = session.get('cart', {})
         total_quantity = sum(item['quantity'] for item in cart.values())
         print(f"Cart count injected: {total_quantity}")
-        
+
         return dict(cart_count=total_quantity)
 
     

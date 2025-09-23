@@ -5,14 +5,50 @@
         {% include 'partials/header.html' %}
 
         <!-- Hero Banner -->
-        <section class="bg-gray-100 p-6 flex flex-col md:flex-row items-center justify-between">
-            <div>
-            <h2 class="text-3xl font-bold mb-2 text-red-700">Spring Sales</h2>
-            <p class="mb-4">Up to 50% off</p>
-            <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Shop Now</a>
+        <!-- Hero Banner Carousel -->
+      <section class="bg-gray-100 p-6">
+        <div class="swiper hero-swiper">
+          <div class="swiper-wrapper">
+            
+            <!-- Slide 1 -->
+            <div class="swiper-slide flex flex-col md:flex-row items-center justify-between">
+              <div>
+                <h2 class="text-3xl font-bold mb-2 text-red-700">Spring Sales</h2>
+                <p class="mb-4">Up to 50% off</p>
+                <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Shop Now</a>
+              </div>
+              <img src="{{ url_for('static', filename='images/hero-bag.png') }}" alt="Sale Bag" class="w-48 mt-4 md:mt-0" />
             </div>
-            <img src="{{ url_for('static', filename='images/hero-bag.png') }}" alt="Sale Bag" class="w-48 mt-4 md:mt-0" />
-        </section>
+
+            <!-- Slide 2 -->
+            <div class="swiper-slide flex flex-col md:flex-row items-center justify-between">
+              <div>
+                <h2 class="text-3xl font-bold mb-2 text-blue-700">New Arrivals</h2>
+                <p class="mb-4">Fresh styles just dropped</p>
+                <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Explore</a>
+              </div>
+              <img src="{{ url_for('static', filename='images/hero-shoes.png') }}" alt="Shoes" class="w-48 mt-4 md:mt-0" />
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="swiper-slide flex flex-col md:flex-row items-center justify-between">
+              <div>
+                <h2 class="text-3xl font-bold mb-2 text-green-700">Exclusive Deals</h2>
+                <p class="mb-4">Save big this week</p>
+                <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Grab Now</a>
+              </div>
+              <img src="{{ url_for('static', filename='images/hero-watch.png') }}" alt="Watch" class="w-48 mt-4 md:mt-0" />
+            </div>
+
+          </div>
+
+          <!-- Navigation & Pagination -->
+          <div class="swiper-pagination"></div>
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div>
+        </div>
+      </section>
+
 
 
         <!-- Categories -->

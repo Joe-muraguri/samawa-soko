@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <!-- Swiper CSS -->
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+
     <link rel="stylesheet" href="{{ url_for('static', filename='src/output.css') }}">
     <title>Document</title>
 </head>
@@ -15,10 +21,29 @@
 
     {% include 'partials/footer.html' %}
     
-    
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script>
         feather.replace();
+            const heroSwiper = new Swiper(".hero-swiper", {
+        loop: true,
+        autoplay: {
+        delay: 4000,
+        disableOnInteraction: false,
+        },
+        pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+        },
+        navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+        },
+        effect: "slide",
+        speed: 600,
+    });
     </script>
 </body>
 </html>

@@ -6,46 +6,53 @@
 
         <!-- Hero Banner -->
         <!-- Hero Banner Carousel -->
-      <section class="bg-gray-100 p-6">
-        <div class="swiper hero-swiper">
+      <!-- Full-Width Hero Banner Carousel -->
+      <section class="relative w-full">
+        <div class="swiper hero-swiper h-[70vh] md:h-[80vh] w-full">
           <div class="swiper-wrapper">
-            
+
             <!-- Slide 1 -->
-            <div class="swiper-slide flex flex-col md:flex-row items-center justify-between">
-              <div>
-                <h2 class="text-3xl font-bold mb-2 text-red-700">Spring Sales</h2>
-                <p class="mb-4">Up to 50% off</p>
-                <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Shop Now</a>
+            <div class="swiper-slide relative bg-cover bg-center flex items-center justify-start text-white"
+                style="background-image: url('https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-1.jpg')">
+              <div class="bg-black/50 p-8 rounded-lg ml-8 md:ml-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Spring Sales</h2>
+                <p class="mb-6 text-lg">Up to 50% off</p>
+                <a href="/shop" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold">
+                  Shop Now
+                </a>
               </div>
-              <img src="{{ url_for('static', filename='images/hero-bag.png') }}" alt="Sale Bag" class="w-48 mt-4 md:mt-0" />
             </div>
 
             <!-- Slide 2 -->
-            <div class="swiper-slide flex flex-col md:flex-row items-center justify-between">
-              <div>
-                <h2 class="text-3xl font-bold mb-2 text-blue-700">New Arrivals</h2>
-                <p class="mb-4">Fresh styles just dropped</p>
-                <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Explore</a>
+            <div class="swiper-slide relative bg-cover bg-center flex items-center justify-start text-white"
+                style="background-image: url('https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-2.jpg')">
+              <div class="bg-black/50 p-8 rounded-lg ml-8 md:ml-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">New Arrivals</h2>
+                <p class="mb-6 text-lg">Fresh styles just dropped</p>
+                <a href="/shop" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+                  Explore
+                </a>
               </div>
-              <img src="{{ url_for('static', filename='images/hero-shoes.png') }}" alt="Shoes" class="w-48 mt-4 md:mt-0" />
             </div>
 
             <!-- Slide 3 -->
-            <div class="swiper-slide flex flex-col md:flex-row items-center justify-between">
-              <div>
-                <h2 class="text-3xl font-bold mb-2 text-green-700">Exclusive Deals</h2>
-                <p class="mb-4">Save big this week</p>
-                <a href="/shop" class="bg-black text-white px-4 py-2 rounded">Grab Now</a>
+            <div class="swiper-slide relative bg-cover bg-center flex items-center justify-start text-white"
+                style="background-image: url('https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-3.jpg')">
+              <div class="bg-black/50 p-8 rounded-lg ml-8 md:ml-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Exclusive Deals</h2>
+                <p class="mb-6 text-lg">Save big this week</p>
+                <a href="/shop" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
+                  Grab Now
+                </a>
               </div>
-              <img src="{{ url_for('static', filename='images/hero-watch.png') }}" alt="Watch" class="w-48 mt-4 md:mt-0" />
             </div>
 
           </div>
 
-          <!-- Navigation & Pagination -->
+          <!-- Pagination & Navigation -->
           <div class="swiper-pagination"></div>
-          <div class="swiper-button-next"></div>
-          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next text-white"></div>
+          <div class="swiper-button-prev text-white"></div>
         </div>
       </section>
 

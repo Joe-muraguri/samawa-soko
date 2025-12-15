@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import jsonify
+from flask import jsonify, render_template
 from flask_jwt_extended import get_jwt_identity
 from werkzeug.utils import secure_filename
 from app.config import S3_BUCKET, s3
@@ -7,6 +7,13 @@ import os
 from app.utils.pdf_generate import generate_pdf
 import smtplib
 from email.message import EmailMessage
+import resend
+import logging
+from threading import Thread
+import pdfkit
+
+
+resend.api_key = os.getenv("RESEND_API_KEY")
 
 
 def role_required(required_role):
@@ -98,5 +105,93 @@ def send_email_with_pdf(to_email, order_id, amount, phone, shipping_details, exp
         server.send_message(msg)
     print("Email sent successfully.")
 
+def generate_order_pdf(order_id, amount, phone, shipping_details):
+    """Generate PDF receipt - customize as needed"""
+    html = render_template(
+        'emails/order_receipt.html',  # create this template
+        order_id=order_id,
+        amount=amount,
+        phone=phone,
+        shipping_details=shipping_details
+    )
+    try:
+        pdf = pdfkit.from_string(html, False)
+        return pdf
+    except Exception as e:
+        logging.error(f"PDF generation failed: {e}")
+        return None
+
+def send_email_with_resend(
+    to_email: str,
+    order_id: int,
+    amount: float,
+    phone: str,
+    shipping_details: str,
+    expected_time: str = "3-5 business days"
+):
+    """
+    Send order confirmation email with PDF receipt using Resend
+    """
+    if not to_email or not to_email.strip():
+        logging.warning(f"Order {order_id}: No email provided, skipping send")
+        return False
+
+    to_email = to_email.strip()
+
+    try:
+        # Generate PDF receipt
+        pdf_content = generate_order_pdf(order_id, amount, phone, shipping_details)
+
+        # Email HTML body
+        html_body = render_template(
+            'emails/order_confirmation.html',
+            order_id=order_id,
+            amount=amount,
+            phone=phone,
+            shipping_details=shipping_details,
+            expected_time=expected_time
+        )
+
+        params = {
+            "from": "Samawa Soko <orders@samawa.co.ke>",  # Must be verified domain or use onresend.com for testing
+            "to": [to_email],
+            "subject": f"Order Confirmed #{order_id} - Thank You!",
+            "html": html_body,
+        }
+
+        # Attach PDF if generated
+        if pdf_content:
+            params["attachments"] = [
+                {
+                    "filename": f"receipt_order_{order_id}.pdf",
+                    "content": pdf_content,
+                    "content_type": "application/pdf"
+                }
+            ]
+
+        response = resend.Emails.send(params)
+        logging.info(f"Order {order_id}: Email sent via Resend to {to_email} - ID: {response.get('id')}")
+        return True
+
+    except Exception as e:
+        logging.error(f"Order {order_id}: Failed to send email via Resend: {str(e)}")
+        return False
 
 
+def send_confirmation_email_async(order_id, amount, phone, shipping_details, customer_email):
+    if not customer_email or not customer_email.strip():
+        logging.warning(f"Order {order_id}: No email to send confirmation")
+        return
+
+    def _send():
+        send_email_with_resend(
+            to_email=customer_email,
+            order_id=order_id,
+            amount=amount,
+            phone=phone,
+            shipping_details=shipping_details
+        )
+
+    thread = Thread(target=_send)
+    thread.daemon = True
+    thread.start()

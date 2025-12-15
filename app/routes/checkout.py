@@ -14,7 +14,7 @@ import os
 import base64
 import requests
 from twilio.rest import Client
-from app.utils.utils import send_sms, send_email_with_pdf
+from app.utils.utils import send_sms, send_email_with_pdf,send_confirmation_email_async
 
 
 checkout_bp = Blueprint('checkout', __name__)
@@ -230,14 +230,23 @@ def payment_callback():
             send_sms(sms_message,phone_number)
             # Example after payment success
             print("Customer email to use is:", CUSTOMER_EMAIL)
-            send_email_with_pdf(
-                to_email=order.customer_email,
-                order_id=order.id,
-                amount=order.total,
-                phone=phone_number,
-                shipping_details=order.customer_address,
-                expected_time="3-5 business days"
-            )
+            # send_email_with_pdf(
+            #     to_email=order.customer_email,
+            #     order_id=order.id,
+            #     amount=order.total,
+            #     phone=phone_number,
+            #     shipping_details=order.customer_address,
+            #     expected_time="3-5 business days"
+            # )
+
+            # Fire-and-forget email via Resend (non-blocking!)
+            send_confirmation_email_async(
+            order_id=order.id,
+            amount=order.total,
+            phone=phone_number or order.customer_phone,
+            shipping_details=order.customer_address or "N/A",
+            customer_email=order.customer_email
+        )
 
             
             # Clear cart from session

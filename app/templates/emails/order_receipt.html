@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Receipt {{ order_id }}</title></head>
+<body>
+    <h2>Official Receipt</h2>
+    <p><strong>Order:</strong> #{{ order_id }}</p>
+    <p><strong>Amount Paid:</strong> KSh {{ amount }}</p>
+    <p><strong>M-Pesa Receipt:</strong> {{ receipt }}</p>
+    <p><strong>Date:</strong> {{ "now"|strftime("%d %B %Y") }}</p>
+    <hr>
+    <p>Thank you!</p>
+</body>
+</html>

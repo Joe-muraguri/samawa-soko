@@ -54,9 +54,7 @@
 
             <!-- Location Selection Form -->
             <div class="mt-4 p-4 border rounded-lg bg-white">
-                <h3 class="text-md font-semibold mb-2">Shipping Sammary</h3>
-
-              
+                <h3 class="text-md font-semibold mb-2">Shipping Summary</h3>
 
                 <div class="bg-pink-50 border border-pink-100 rounded-lg p-4">
                     <h3 class="font-semibold text-lg mb-2">Kahawa West <span class="text-orange-500">KSH 140</span></h3>
@@ -85,7 +83,7 @@
             </label>
 
         </div>
-    
+    </div>
 
     <!-- Order Summary -->
     <div class="bg-white p-4 rounded-lg shadow-md">
@@ -97,40 +95,39 @@
             <p class="font-bold">Total: KSh 2,642</p>
         </div>
         <a href="{{ url_for('order.order_process') }}" id="confirmOrder">
-            <button  class="w-full mt-6 bg-orange-500 text-white py-2 rounded-lg">
+            <button class="w-full mt-6 bg-orange-500 text-white py-2 rounded-lg">
                 CONFIRM ORDER & PAY
             </button>
         </a>
     
     </div>
 </div>
-</div>
 
 <script>
 document.getElementById("confirmOrder").addEventListener("click", (event) => {
     event.preventDefault();
 
-  const phone = document.getElementById("phone").value;
-  const firstName = document.getElementById("firstName").value;
-  const email = document.getElementById("email").value;
-  const town = document.getElementById("town").value;
-  const city = document.getElementById("city").value;
-  const shipping = document.querySelector('input[name="shipping"]:checked')?.value || '';
+    const phone = document.getElementById("phone").value;
+    const firstName = document.getElementById("firstName").value;
+    const email = document.getElementById("email").value;
+    const town = document.getElementById("town").value;
+    const city = document.getElementById("city").value;
+    const shipping = document.querySelector('input[name="shipping"]:checked')?.value || '';
 
-  
+    // Save to localStorage (added shipping)
+    localStorage.setItem("checkoutData", JSON.stringify({
+        phone,
+        firstName,
+        email,
+        town,
+        city,
+        shipping,
+        total: 2642  // Hardcoded for demo; fetch dynamically if needed
+    }));
 
-  // Save to localStorage
-  localStorage.setItem("checkoutData", JSON.stringify({
-    phone,
-    firstName,
-    email,
-    town,
-    city
-  }));
-
-  // Now go to order_process.html
-  const checkoutLink = document.getElementById("confirmOrder").getAttribute("href");
-  window.location.href = checkoutLink;
+    // Now go to order_process.html
+    const checkoutLink = document.getElementById("confirmOrder").getAttribute("href");
+    window.location.href = checkoutLink;
 });
 </script>
 

@@ -1,16 +1,33 @@
-<!-- checkout.html (your confirmation page) -->
 {% extends "base.html" %}
 {% block content %}
 <div class="container mx-auto px-4 py-6">
     {% include 'partials/header.html' %}
 
     <div id="payment-flow">
-        <!-- Initial Loading State -->
-        <div id="loading-state" class="bg-white p-6 rounded-lg shadow-md text-center">
+        <!-- Review State (new: shown initially for user confirmation) -->
+        <div id="review-state" class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Review Your Order</h2>
+            <div class="space-y-2 mb-6">
+                <p><strong>Phone:</strong> <span id="review-phone"></span></p>
+                <p><strong>Name:</strong> <span id="review-name"></span></p>
+                <p><strong>Email:</strong> <span id="review-email"></span></p>
+                <p><strong>Town:</strong> <span id="review-town"></span></p>
+                <p><strong>City:</strong> <span id="review-city"></span></p>
+                <p><strong>Shipping:</strong> <span id="review-shipping"></span></p>
+                <p><strong>Total:</strong> KSh <span id="review-total"></span></p>
+            </div>
+            <button id="pay-now-btn" class="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">
+                Pay Now with M-Pesa
+            </button>
+            <a href="{{ url_for('checkout') }}" class="block text-center mt-4 text-gray-600">Edit Details</a>
+        </div>
+
+        <!-- Initial Loading State (hidden initially) -->
+        <div id="loading-state" class="bg-white p-6 rounded-lg shadow-md text-center hidden">
             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <h2 class="text-xl font-semibold mb-2">Processing Your Order</h2>
-            <p class="text-gray-600 mb-4">Please wait while we prepare your payment request...</p>
-            <p class="text-sm text-gray-500">You will receive an STK push prompt on your phone shortly</p>
+            <h2 class="text-xl font-semibold mb-2">Processing Your Payment</h2>
+            <p class="text-gray-600 mb-4">Please wait while we send the STK push...</p>
+            <p class="text-sm text-gray-500">Confirm the prompt on your phone</p>
         </div>
 
         <!-- Payment Success (hidden initially) -->
@@ -43,7 +60,7 @@
                 </svg>
             </div>
             <h2 class="text-xl font-semibold mb-2">Payment Not Completed</h2>
-            <p class="text-gray-600 mb-4">We couldn't confirm your M-Pesa payment</p>
+            <p id="failed-message" class="text-gray-600 mb-4">We couldn't confirm your M-Pesa payment</p>
             <div class="bg-gray-50 p-4 rounded-md mb-4 text-left">
                 <h3 class="font-medium mb-2">What you can do:</h3>
                 <ul class="list-disc list-inside text-sm space-y-1">
@@ -53,9 +70,9 @@
                 </ul>
             </div>
             <div class="flex space-x-3 justify-center">
-                <a href="" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded transition duration-200">
+                <button id="retry-payment" class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded transition duration-200">
                     Try Payment Again
-                </a>
+                </button>
                 <a href="" class="inline-block border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-2 rounded transition duration-200">
                     Contact Support
                 </a>
@@ -65,18 +82,38 @@
 </div>
 
 <script>
-    
 document.addEventListener('DOMContentLoaded', function() {
-    // Start payment processing immediately
-    
     const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
     console.log("Checkout Data:", checkoutData);
 
     if (!checkoutData.phone) {
         console.error("Missing phone number in checkout data");
-        return
+        showPaymentFailed('Missing required details. Please go back and complete the form.');
+        return;
     }
-    initiatePayment();
+
+    // Populate review state
+    document.getElementById('review-phone').textContent = checkoutData.phone;
+    document.getElementById('review-name').textContent = checkoutData.firstName;
+    document.getElementById('review-email').textContent = checkoutData.email;
+    document.getElementById('review-town').textContent = checkoutData.town;
+    document.getElementById('review-city').textContent = checkoutData.city;
+    document.getElementById('review-shipping').textContent = checkoutData.shipping || 'Not selected';
+    document.getElementById('review-total').textContent = checkoutData.total || 'N/A';
+
+    // Pay Now button triggers payment
+    document.getElementById('pay-now-btn').addEventListener('click', function() {
+        document.getElementById('review-state').classList.add('hidden');
+        document.getElementById('loading-state').classList.remove('hidden');
+        initiatePayment();
+    });
+
+    // Retry button (resets to review state for simplicity; adjust as needed)
+    document.getElementById('retry-payment').addEventListener('click', function() {
+        document.getElementById('failed-state').classList.add('hidden');
+        document.getElementById('review-state').classList.remove('hidden');
+    });
+
     async function initiatePayment() {
         try {
             // 1. Initiate M-Pesa STK Push
@@ -84,13 +121,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    
                 },
                 body: JSON.stringify({
-                    // Include any necessary checkout data
-                    amount: 1,
+                    amount: checkoutData.total || 1,  // Use actual total
                     phone: checkoutData.phone,
-                    email:checkoutData.email
+                    email: checkoutData.email,
+                    shipping: checkoutData.shipping  // Added for completeness
                 })
             });
 
@@ -110,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function pollPaymentStatus(orderId) {
-        const maxAttempts = 20;
+        const maxAttempts = 40;  // Increased for longer timeout
         let attempts = 0;
         
         const interval = setInterval(async () => {
@@ -124,10 +160,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.status === 'completed') {
                     clearInterval(interval);
                     showPaymentSuccess(orderId, data.delivery_date);
-                    
-                    // Send confirmation email/SMS
-                    //await fetch(`/order/confirm/${orderId}`, { method: 'POST' });
-                    
+                } else if (data.status === 'failed' || data.status === 'not_found' || data.status === 'error') {
+                    clearInterval(interval);
+                    showPaymentFailed(data.message || 'Payment failed or order not found');
                 } else if (attempts >= maxAttempts) {
                     clearInterval(interval);
                     showPaymentFailed('Payment confirmation timed out');
@@ -137,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearInterval(interval);
                 showPaymentFailed('Error verifying payment');
             }
-        }, 6000); // Check every 3 seconds
+        }, 3000);  // Reduced to 3 seconds for faster checks
     }
 
     function showPaymentSuccess(orderId, deliveryDate) {
@@ -150,10 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showPaymentFailed(errorMessage) {
         document.getElementById('loading-state').classList.add('hidden');
         document.getElementById('failed-state').classList.remove('hidden');
-        
-        if (errorMessage) {
-            document.querySelector('#failed-state p.text-gray-600').textContent += `: ${errorMessage}`;
-        }
+        document.getElementById('failed-message').textContent = `We couldn't confirm your M-Pesa payment: ${errorMessage}`;
     }
 });
 </script>

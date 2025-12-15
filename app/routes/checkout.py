@@ -30,7 +30,7 @@ def lipa_na_mpesa(phone_number):
 
 
 
-    #choose one depending on you development environment
+    
     #sandbox
     # url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
     #!live
@@ -124,7 +124,7 @@ def initiate_payment():
             product = Product.query.get(product_id)
             if product:
                 order_item = OrderItem(
-                    order_id=new_order.id,
+                    order_id=new_order.id, #The new order id create after flushing
                     product_id=product_id,
                     quantity=item_data['quantity'],
                     price=item_data['price']
@@ -200,6 +200,7 @@ def payment_callback():
             
             # Extract payment details safely
             metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
+            print("Callback metadata items:", metadata)
             payment_data = {}
             
             for item in metadata:
@@ -261,11 +262,17 @@ def payment_callback():
 @checkout_bp.route('/check-payment/<order_id>', methods=['GET'])
 def check_payment(order_id):
     try:
+        start_time = datetime.utcnow()  # Log query start time
         order = Order.query.get(order_id)
+        query_duration = (datetime.utcnow() - start_time).total_seconds()  # Measure DB query time
         if not order:
+            print(f"Order {order_id} not found. Query took {query_duration}s")
             return jsonify({'status': 'not_found'}), 404
-        print("Checking payment status for order ID:", order_id)
-        print("Order status before check:", order.status)
+        
+        print(f"Checking payment status for order ID: {order_id}")
+        print(f"Order status before check: {order.status}")
+        print(f"DB query took {query_duration}s")  # Log to diagnose delays
+        
         if order.status == 'completed':
             return jsonify({
                 'status': 'completed',
@@ -277,6 +284,7 @@ def check_payment(order_id):
             return jsonify({'status': 'pending'})
 
     except Exception as e:
+        print(f"Error checking order {order_id}: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': str(e)

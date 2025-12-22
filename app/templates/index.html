@@ -7,60 +7,108 @@
         <!-- Hero Banner -->
         <!-- Hero Banner Carousel -->
       <!-- Full-Width Hero Banner Carousel -->
-      <section class="relative w-full">
-        <div class="swiper hero-swiper h-[70vh] md:h-[80vh] w-full">
-          <div class="swiper-wrapper">
+      <section class="relative w-full overflow-hidden">
+  <div class="swiper hero-swiper
+            h-[45vh]
+            sm:h-[50vh]
+            md:h-[60vh]
+            lg:h-[65vh]
+            w-full">
 
-            <!-- Slide 1 -->
-            <div class="swiper-slide relative bg-cover bg-center flex items-center justify-start text-white"
-                style="background-image: url('https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-1.jpg')">
-              <div class="bg-black/50 p-8 rounded-lg ml-8 md:ml-16">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">Spring Sales</h2>
-                <p class="mb-6 text-lg">Up to 50% off</p>
-                <a href="/shop" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold">
-                  Shop Now
-                </a>
-              </div>
-            </div>
 
-            <!-- Slide 2 -->
-            <div class="swiper-slide relative bg-cover bg-center flex items-center justify-start text-white"
-                style="background-image: url('https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-2.jpg')">
-              <div class="bg-black/50 p-8 rounded-lg ml-8 md:ml-16">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">New Arrivals</h2>
-                <p class="mb-6 text-lg">Fresh styles just dropped</p>
-                <a href="/shop" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
-                  Explore
-                </a>
-              </div>
-            </div>
+    <div class="swiper-wrapper">
 
-            <!-- Slide 3 -->
-            <div class="swiper-slide relative bg-cover bg-center flex items-center justify-start text-white"
-                style="background-image: url('https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-3.jpg')">
-              <div class="bg-black/50 p-8 rounded-lg ml-8 md:ml-16">
-                <h2 class="text-4xl md:text-5xl font-bold mb-4">Exclusive Deals</h2>
-                <p class="mb-6 text-lg">Save big this week</p>
-                <a href="/shop" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
-                  Grab Now
-                </a>
-              </div>
-            </div>
+      <!-- Slide 1 -->
+      <div class="swiper-slide relative flex items-center">
+        <img
+          src="https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-1.jpg"
+          class="absolute inset-0 w-full h-full object-cover object-center md:object-top"
+          alt="Spring Sales"
+        />
+        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
 
-          </div>
-
-          <!-- Pagination & Navigation -->
-          <div class="swiper-pagination"></div>
-          <div class="swiper-button-next text-white"></div>
-          <div class="swiper-button-prev text-white"></div>
+        <div class="relative z-10 max-w-xl px-6 md:px-16 text-white">
+          <h2 class="text-4xl md:text-6xl font-bold mb-4 animate-slide-up">
+            Spring Sales
+          </h2>
+          <p class="text-lg md:text-xl mb-6 text-gray-200 animate-slide-up animate-delay-100">
+            Up to 50% off selected items
+          </p>
+          <a
+            href="/shop"
+            class="inline-block bg-red-600 hover:bg-red-700 transition px-8 py-4 rounded-full font-semibold animate-slide-up animate-delay-200"
+          >
+            Shop Now
+          </a>
         </div>
-      </section>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="swiper-slide relative flex items-center">
+        <img
+          src="https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-2.jpg"
+          class="absolute inset-0 w-full h-full object-cover"
+          alt="New Arrivals"
+        />
+        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
+
+        <div class="relative z-10 max-w-xl px-6 md:px-16 text-white">
+          <h2 class="text-4xl md:text-6xl font-bold mb-4 animate-slide-up">
+            New Arrivals
+          </h2>
+          <p class="text-lg md:text-xl mb-6 text-gray-200 animate-slide-up animate-delay-100">
+            Fresh styles just dropped
+          </p>
+          <a
+            href="/shop"
+            class="inline-block bg-blue-600 hover:bg-blue-700 transition px-8 py-4 rounded-full font-semibold animate-slide-up animate-delay-200"
+          >
+            Explore
+          </a>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="swiper-slide relative flex items-center">
+        <img
+          src="https://sawama-soko.s3.eu-north-1.amazonaws.com/products/carousel-3.jpg"
+          class="absolute inset-0 w-full h-full object-cover"
+          alt="Exclusive Deals"
+        />
+        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
+
+        <div class="relative z-10 max-w-xl px-6 md:px-16 text-white">
+          <h2 class="text-4xl md:text-6xl font-bold mb-4 animate-slide-up">
+            Exclusive Deals
+          </h2>
+          <p class="text-lg md:text-xl mb-6 text-gray-200 animate-slide-up animate-delay-100">
+            Save big this week
+          </p>
+          <a
+            href="/shop"
+            class="inline-block bg-green-600 hover:bg-green-700 transition px-8 py-4 rounded-full font-semibold animate-slide-up animate-delay-200"
+          >
+            Grab Now
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Controls -->
+    <div class="swiper-pagination !bottom-8"></div>
+    <div class="swiper-button-prev !text-white !left-6"></div>
+    <div class="swiper-button-next !text-white !right-6"></div>
+  </div>
+</section>
+
+
 
 
 
         <!-- Categories -->
         <section class="p-6">
-            <h3 class="text-xl font-semibold mb-4">Shop by Categoryss</h3>
+            <h3 class="text-xl font-semibold mb-4">HAPPY SHOPPING</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             {% for category in categories %}
                 <div class="border p-4 rounded text-center hover:shadow-md">
@@ -85,7 +133,7 @@
           <!-- Product Image -->
           <div class="relative">
             <img src="{{ product.image_url }}" alt="{{ product.name }}"
-                 class="w-full h-52 object-contain rounded-lg bg-gray-100 group-hover:scale-105 transition-transform duration-500">
+                 class="w-full h-52 object-cover rounded-lg bg-gray-100 group-hover:scale-105 transition-transform duration-500">
           </div>
 
           <!-- Product Details -->
@@ -133,21 +181,7 @@
 
 
 
-        <!-- Deal of the Day -->
-        <section class="bg-gray-100 p-6 text-center">
-            <h4 class="text-lg font-semibold mb-2">Deal of the Day</h4>
-            <p class="mb-2"> dealtitle </p>
-            <a href="/product/" class="bg-black text-white px-4 py-2 rounded">Buy Now</a>
-        </section>
-
-        <!-- Newsletter -->
-        <section class="p-6 text-center">
-            <h4 class="text-lg font-semibold mb-2">Get 10% Off Your First Order!</h4>
-            <form action="/subscribe" method="POST" class="flex flex-col md:flex-row justify-center items-center">
-            <input type="email" name="email" placeholder="Email address" required class="border px-3 py-2 rounded w-full md:w-1/4" />
-            <button type="submit" class="mt-2 md:mt-0 md:ml-2 bg-blue-600 text-white px-4 py-2 rounded">Subscribe</button>
-            </form>
-        </section>
+        
 
 
         

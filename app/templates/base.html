@@ -11,7 +11,10 @@
     href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
     />
 
+ 
+
     <link rel="stylesheet" href="{{ url_for('static', filename='src/output.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
     <title>Document</title>
 </head>
 <body>
@@ -26,24 +29,29 @@
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script>
-        feather.replace();
-            const heroSwiper = new Swiper(".hero-swiper", {
-            loop: true,
-            autoplay: {
-            delay: 5000,
-            disableOnInteraction: false,
-            },
-            pagination: {
-            el: ".swiper-pagination",
-            clickable: true,
-            },
-            navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-            },
-            effect: "fade", // fade looks cleaner for banners
-            speed: 800,
-        });
-    </script>
+  document.addEventListener("DOMContentLoaded", function () {
+    new Swiper(".hero-swiper", {
+      loop: true,
+      speed: 1000,
+      effect: "fade",
+
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+      },
+
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+    });
+  });
+</script>
+
 </body>
 </html>

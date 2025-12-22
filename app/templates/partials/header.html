@@ -9,13 +9,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header class="bg-white border-b shadow-sm fixed md:sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <header class="bg-white border-b shadow-sm fixed md:sticky top-0 left-0 w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
             <!-- Logo -->
             <a href="/" class="text-gray-700 hover:text-indigo-600 transition-colors">
-                <div class="flex items-center justify-center bg-white  p-4 w-32 h-32 transition duration-300 cursor-pointer">
+                
                     <img src="https://sawama-soko.s3.eu-north-1.amazonaws.com/products/jojo.png" alt="Logo" class="h-10 md:h-12 w-auto" />
-                </div>
+                
             </a>
 
             <!-- Navigation Links -->
@@ -36,7 +36,7 @@
                     </span> -->
                 <!-- </a> --> 
                 <a href="{{ url_for('cart.view_cart')}}" class="text-gray-600 hover:text-indigo-600 relative">
-                    <i class="fas fa-shopping-cart text-lg absolute"></i>
+                    <i class="fas fa-shopping-cart text-lg "></i>
                     {% if cart_count > 0 %}
                     <span id="cart-count" class="absolute -top-2 -right-2 bg-pink-500 text-white rounded-full text-xs h-5 w-5 flex items-center justify-center">{{ cart_count }}</span>
                     {% endif %}

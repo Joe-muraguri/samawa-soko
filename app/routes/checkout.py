@@ -283,6 +283,8 @@ def check_payment(order_id):
         print(f"DB query took {query_duration}s")  # Log to diagnose delays
         
         if order.status == 'completed':
+            session.pop("cart", None)
+            session.modified = True
             return jsonify({
                 'status': 'completed',
                 'delivery_date': (datetime.utcnow() + timedelta(days=3)).strftime('%Y-%m-%d')

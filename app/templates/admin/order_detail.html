@@ -1,0 +1,32 @@
+<div class="bg-white rounded-xl shadow-sm p-6">
+  <h2 class="text-xl font-semibold mb-4">Order #{{ order.id }}</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+    <p><strong>Customer:</strong> {{ order.user_name }}</p>
+    <p><strong>Phone:</strong> {{ order.user_phone }}</p>
+    <p><strong>Status:</strong> {{ order.status }}</p>
+    <p><strong>Total:</strong> KSh {{ order.total_amount }}</p>
+  </div>
+
+  <h3 class="font-semibold mb-3">Items</h3>
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="p-3">Product</th>
+        <th class="p-3">Qty</th>
+        <th class="p-3">Price</th>
+        <th class="p-3">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y">
+      {% for item in order.items %}
+      <tr>
+        <td class="p-3">{{ item.product_name }}</td>
+        <td class="p-3">{{ item.quantity }}</td>
+        <td class="p-3">KSh {{ item.price }}</td>
+        <td class="p-3">KSh {{ item.price * item.quantity }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

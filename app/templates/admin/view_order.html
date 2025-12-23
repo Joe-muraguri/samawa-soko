@@ -1,0 +1,15 @@
+<form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}"
+      class="mt-6 flex gap-2">
+  <select name="status"
+          class="border rounded-lg px-3 py-2">
+    <option>Pending</option>
+    <option>Paid</option>
+    <option>Shipped</option>
+    <option>Completed</option>
+    <option>Cancelled</option>
+  </select>
+
+  <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+    Update Status
+  </button>
+</form>
